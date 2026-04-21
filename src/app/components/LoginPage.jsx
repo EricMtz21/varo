@@ -2,7 +2,7 @@
 
 import Beams from "@/components/Beams";
 import { createClient } from "../../utils/supabase/client";
-import { GoogleLogo } from "@phosphor-icons/react";
+import { GoogleLogoIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 export default function LoginPage() {
@@ -50,7 +50,7 @@ export default function LoginPage() {
           {loading ? (
             <span className="w-5 h-5 border-2 border-gray-400 border-t-[#07090F] rounded-full animate-spin" />
           ) : (
-            <GoogleLogo size={22} weight="bold" color="#07090F" />
+            <GoogleLogoIcon size={22} weight="bold" color="#07090F" />
           )}
           <span>{loading ? "Conectando..." : "Iniciar con Google"}</span>
         </button>
