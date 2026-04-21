@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"accounting finance SaaS dashboard professional\" --design-system -p \"MiContaduria\")",
+      "Bash(pnpm build *)",
+      "Bash(node -e \"const p = require\\('@phosphor-icons/react'\\); const keys = Object.keys\\(p\\); console.log\\('Total exports:', keys.length\\); console.log\\('Sample:', keys.slice\\(0,10\\)\\);\")",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const p=JSON.parse\\(d\\); console.log\\('main:', p.main, 'module:', p.module, 'exports:', JSON.stringify\\(p.exports,null,2\\).slice\\(0,400\\)\\);\")",
+      "Bash(node -e \"const p = require\\('c:/Users/ericm/OneDrive/Escritorio/micontaduria/node_modules/@phosphor-icons/react/dist/index.cjs.js'\\); const keys = Object.keys\\(p\\); console.log\\('Total:', keys.length\\); console.log\\('Sample icons:', keys.filter\\(k => !k.startsWith\\('_'\\)\\).slice\\(0,20\\)\\);\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}
