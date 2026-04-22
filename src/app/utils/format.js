@@ -77,6 +77,52 @@ export function getOccurrencesInMonth(tx, year, month) {
   return dates;
 }
 
+export function calcStats(box) {
+  const primaryParam = parseFloat(box.rate) / 100;
+  const dailyPrimaryRate = primaryParam / 365;
+
+  const secondaryParam = box.secondaryRate
+    ? parseFloat(box.secondaryRate) / 100
+    : primaryParam;
+  const dailySecondaryRate = secondaryParam / 365;
+
+  const threshold = box.limitAmount ? parseFloat(box.limitAmount) : Infinity;
+
+  const start = new Date(box.startDate + "T00:00:00");
+  const now = new Date();
+
+  const totalDays = Math.max(0, (now - start) / (1000 * 60 * 60 * 24));
+  const fullDays = Math.floor(totalDays);
+  const fractionalDay = totalDays - fullDays;
+
+  let currentBalance = parseFloat(box.initialAmount);
+  let todayEarnings = 0;
+
+  for (let i = 0; i <= fullDays; i++) {
+    let dayInterest = 0;
+    if (currentBalance <= threshold) {
+      dayInterest = currentBalance * dailyPrimaryRate;
+    } else {
+      dayInterest =
+        threshold * dailyPrimaryRate +
+        (currentBalance - threshold) * dailySecondaryRate;
+    }
+
+    if (i === fullDays) {
+      todayEarnings = dayInterest;
+    } else {
+      currentBalance += dayInterest;
+    }
+  }
+
+  if (fractionalDay > 0) {
+    currentBalance += todayEarnings * fractionalDay;
+  }
+
+  const totalEarned = currentBalance - box.initialAmount;
+  return { currentBalance, totalEarned, todayEarnings };
+}
+
 export function getOccurrencesUpToMonth(tx, year, month) {
   if (!tx.is_recurring && !tx.isRecurring) {
     const d = new Date(tx.date + "T12:00:00");

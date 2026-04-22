@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CircleNotchIcon, TrayIcon } from "@phosphor-icons/react";
 import TransactionItem from "./TransactionItem";
 import { MONTHS } from "../utils/constants";
@@ -10,8 +11,10 @@ export default function TransactionList({
   grouped,
   currentMonth,
   handleDeleteClick,
+  handleEditClick,
   formatAmount,
 }) {
+  const [selectedTxId, setSelectedTxId] = useState(null);
   if (!hydrated) {
     return (
       <main className="px-4 md:px-0 pb-28 pt-10 max-w-2xl mx-auto flex flex-col items-center justify-center">
@@ -52,7 +55,7 @@ export default function TransactionList({
   }
 
   return (
-    <main className="px-4 md:px-0 pb-28 pt-3 max-w-2xl mx-auto">
+    <main className="px-4 md:px-0 pb-28 pt-3 max-w-2xl mx-auto" onClick={() => setSelectedTxId(null)}>
       <div className="space-y-6">
         {Object.entries(grouped).map(([date, txs], groupIdx) => (
           <div
@@ -69,8 +72,11 @@ export default function TransactionList({
                   key={tx.id}
                   tx={tx}
                   onDelete={handleDeleteClick}
+                  onEdit={handleEditClick}
                   delay={groupIdx * 60 + txIdx * 40}
                   formatAmount={formatAmount}
+                  isSelected={selectedTxId === tx.id}
+                  onSelect={(id) => setSelectedTxId(id)}
                 />
               ))}
             </div>

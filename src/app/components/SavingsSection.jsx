@@ -7,7 +7,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { useState, useEffect, useRef } from "react";
-import { createClient } from "../../utils/supabase/client";
+import { calcStats, formatAmount } from "../utils/format";
 
 const BOX_COLORS = [
   "#818CF8",
@@ -33,66 +33,6 @@ function uid() {
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
-}
-
-function calcStats(box) {
-  const primaryParam = parseFloat(box.rate) / 100;
-  const dailyPrimaryRate = primaryParam / 365;
-
-  const secondaryParam = box.secondaryRate
-    ? parseFloat(box.secondaryRate) / 100
-    : primaryParam;
-  const dailySecondaryRate = secondaryParam / 365;
-
-  const threshold = box.limitAmount ? parseFloat(box.limitAmount) : Infinity;
-
-  const start = new Date(box.startDate + "T00:00:00");
-  const now = new Date();
-
-  const totalDays = Math.max(0, (now - start) / (1000 * 60 * 60 * 24));
-  const fullDays = Math.floor(totalDays);
-  const fractionalDay = totalDays - fullDays;
-
-  let currentBalance = parseFloat(box.initialAmount);
-  let todayEarnings = 0;
-
-  for (let i = 0; i <= fullDays; i++) {
-    let dayInterest = 0;
-    if (currentBalance <= threshold) {
-      dayInterest = currentBalance * dailyPrimaryRate;
-    } else {
-      dayInterest =
-        threshold * dailyPrimaryRate +
-        (currentBalance - threshold) * dailySecondaryRate;
-    }
-
-    if (i === fullDays) {
-      todayEarnings = dayInterest;
-    } else {
-      currentBalance += dayInterest;
-    }
-  }
-
-  if (fractionalDay > 0) {
-    currentBalance += todayEarnings * fractionalDay;
-  }
-
-  const totalEarned = currentBalance - box.initialAmount;
-
-  return { currentBalance, totalEarned, todayEarnings };
-}
-
-function formatAmount(amount, currency = "MXN") {
-  try {
-    return new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return `$${Number(amount).toFixed(2)}`;
-  }
 }
 
 function formatStartDate(dateStr) {
@@ -350,13 +290,15 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
 
 // ─── Savings box card ───────────────────────────────────────────────────────
 
-function SavingsBox({ box, onDelete, delay = 0 }) {
+function SavingsBox({ box, onDelete, onToggleBalance, delay = 0 }) {
   const { currentBalance, totalEarned, todayEarnings } = calcStats(box);
 
   const effectiveRate =
     currentBalance > 0
       ? ((todayEarnings * 365) / currentBalance) * 100
       : parseFloat(box.rate);
+
+  const included = box.includeInBalance !== false;
 
   return (
     <div
@@ -381,7 +323,7 @@ function SavingsBox({ box, onDelete, delay = 0 }) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span
-            className="text-[11px] font-bold px-2 py-1 flex items-center justify-center text-center rounded-lg leading-tight min-w-[50px]"
+            className="text-[11px] font-bold px-2 py-1 flex items-center justify-center text-center rounded-lg leading-tight min-w-12.5"
             title={
               box.limitAmount
                 ? `Base: ${box.rate}%, Excedente: ${box.secondaryRate || 0}%`
@@ -442,45 +384,38 @@ function SavingsBox({ box, onDelete, delay = 0 }) {
           </p>
         </div>
       </div>
+
+      {/* Include in balance toggle */}
+      <div className="mt-3 pt-3 border-t border-[#1E2D45] flex items-center justify-between">
+        <span className="text-[10px] text-[#475569] font-bold uppercase tracking-wide">
+          Incluir en balance
+        </span>
+        <button
+          type="button"
+          onClick={() => onToggleBalance(box.id, !included)}
+          className={`relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0 ${included ? "bg-[#818CF8]" : "bg-[#1E2D45]"}`}
+          aria-label="Incluir en balance general"
+        >
+          <span
+            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${included ? "left-4.5" : "left-0.5"}`}
+          />
+        </button>
+      </div>
     </div>
   );
 }
 
 // ─── Main section ───────────────────────────────────────────────────────────
 
-export default function SavingsSection({ triggerAdd }) {
-  const [boxes, setBoxes] = useState([]);
-  const [hydrated, setHydrated] = useState(false);
+export default function SavingsSection({
+  triggerAdd,
+  boxes,
+  hydrated,
+  onAdd,
+  onDelete,
+  onToggleBalance,
+}) {
   const [showModal, setShowModal] = useState(false);
-  const supabase = createClient();
-
-  useEffect(() => {
-    async function loadSavings() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from("savings_boxes")
-        .select("*")
-        .eq("user_id", user.id);
-
-      if (!error && data) {
-        // Map database columns back to camelCase for the component
-        const formatted = data.map((b) => ({
-          ...b,
-          initialAmount: b.initial_amount,
-          startDate: b.start_date,
-          limitAmount: b.limit_amount,
-          secondaryRate: b.secondary_rate,
-        }));
-        setBoxes(formatted);
-      }
-      setHydrated(true);
-    }
-    loadSavings();
-  }, [supabase]);
 
   // Open modal only when triggerAdd actually increases (not on component mount)
   const prevTriggerRef = useRef(triggerAdd);
@@ -490,59 +425,8 @@ export default function SavingsSection({ triggerAdd }) {
   }, [triggerAdd]);
 
   async function handleAdd(box) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    // We don't want to upload the temporary id generated by the modal.
-    // Also, rename fields for Supabase
-    const {
-      id,
-      initialAmount,
-      startDate,
-      limitAmount,
-      secondaryRate,
-      ...rest
-    } = box;
-    const dbBox = {
-      ...rest,
-      user_id: user.id,
-      initial_amount: initialAmount,
-      start_date: startDate,
-      limit_amount: limitAmount || null,
-      secondary_rate: secondaryRate || null,
-    };
-
-    const { data, error } = await supabase
-      .from("savings_boxes")
-      .insert(dbBox)
-      .select();
-
-    if (!error && data) {
-      const inserted = data[0];
-      setBoxes((prev) => [
-        ...prev,
-        {
-          ...inserted,
-          initialAmount: inserted.initial_amount,
-          startDate: inserted.start_date,
-          limitAmount: inserted.limit_amount,
-          secondaryRate: inserted.secondary_rate,
-        },
-      ]);
-      setShowModal(false);
-    }
-  }
-
-  async function handleDelete(id) {
-    const { error } = await supabase
-      .from("savings_boxes")
-      .delete()
-      .eq("id", id);
-    if (!error) {
-      setBoxes((prev) => prev.filter((b) => b.id !== id));
-    }
+    const success = await onAdd(box);
+    if (success) setShowModal(false);
   }
 
   const nextColor = BOX_COLORS[boxes.length % BOX_COLORS.length];
@@ -643,7 +527,8 @@ export default function SavingsSection({ triggerAdd }) {
             <SavingsBox
               key={box.id}
               box={box}
-              onDelete={handleDelete}
+              onDelete={onDelete}
+              onToggleBalance={onToggleBalance}
               delay={i * 80}
             />
           ))}

@@ -42,6 +42,18 @@
   from { transform: translateX(0);    }
   to   { transform: translateX(-100%); }
 }
+@keyframes tx-menu-above {
+  0%   { transform: translateX(-50%) translateY(8px)  scale(0.80); opacity: 0; }
+  55%  { transform: translateX(-50%) translateY(-5px) scale(1.06); opacity: 1; }
+  75%  { transform: translateX(-50%) translateY(2px)  scale(0.97); }
+  100% { transform: translateX(-50%) translateY(0)    scale(1);    }
+}
+@keyframes tx-menu-below {
+  0%   { transform: translateX(-50%) translateY(-8px) scale(0.80); opacity: 0; }
+  55%  { transform: translateX(-50%) translateY(5px)  scale(1.06); opacity: 1; }
+  75%  { transform: translateX(-50%) translateY(-2px) scale(0.97); }
+  100% { transform: translateX(-50%) translateY(0)    scale(1);    }
+}
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
@@ -56,6 +68,8 @@
   --animate-fade-up:    fade-up    0.32s ease both;
   --animate-slide-in-left: slide-in-left 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
   --animate-slide-out-left: slide-out-left 0.26s cubic-bezier(0.4, 0, 1, 1) both;
+  --animate-tx-menu-above: tx-menu-above 0.40s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-tx-menu-below: tx-menu-below 0.40s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --font-heading: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);

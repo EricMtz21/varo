@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import AddTransactionModal from "./AddTransactionModal";
+import EditTransactionModal from "./EditTransactionModal";
 import SavingsSection from "./SavingsSection";
 import Header from "./Header";
 import NavigationTabs from "./NavigationTabs";
@@ -11,7 +12,7 @@ import TransactionList from "./TransactionList";
 import DeleteModal from "./DeleteModal";
 import { PlusIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react";
 import { MONTHS } from "../utils/constants";
-import { formatAmount, getOccurrencesInMonth, getOccurrencesUpToMonth } from "../utils/format";
+import { formatAmount, getOccurrencesInMonth, getOccurrencesUpToMonth, calcStats } from "../utils/format";
 import { createClient } from "../../utils/supabase/client";
 import Grainient from "@/components/Grainient";
 import DarkVeil from "@/components/DarkVeil";
@@ -24,9 +25,23 @@ export default function FinanceApp({ initialUser }) {
   const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());
   const [showModal, setShowModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
   const [hydrated, setHydrated] = useState(false);
   const [activeTab, setActiveTab] = useState("movements");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("activeTab");
+    // eslint-disable-next-line
+    if (saved) setActiveTab(saved);
+  }, []);
+
+  function handleSetActiveTab(tab) {
+    localStorage.setItem("activeTab", tab);
+    setActiveTab(tab);
+  }
   const [savingsAddTrigger, setSavingsAddTrigger] = useState(0);
+  const [savingsBoxes, setSavingsBoxes] = useState([]);
+  const [savingsHydrated, setSavingsHydrated] = useState(false);
   const [pullState, setPullState] = useState({
     progress: 0,
     pulling: false,
@@ -96,6 +111,30 @@ export default function FinanceApp({ initialUser }) {
   }, []);
 
   useEffect(() => {
+    async function loadSavings() {
+      if (!initialUser) return;
+      const { data, error } = await supabase
+        .from("savings_boxes")
+        .select("*")
+        .eq("user_id", initialUser.id);
+      if (!error && data) {
+        setSavingsBoxes(
+          data.map((b) => ({
+            ...b,
+            initialAmount: b.initial_amount,
+            startDate: b.start_date,
+            limitAmount: b.limit_amount,
+            secondaryRate: b.secondary_rate,
+            includeInBalance: b.include_in_balance ?? true,
+          })),
+        );
+      }
+      setSavingsHydrated(true);
+    }
+    loadSavings();
+  }, [supabase]);
+
+  useEffect(() => {
     async function loadTransactions() {
       if (!initialUser) return;
 
@@ -136,6 +175,7 @@ export default function FinanceApp({ initialUser }) {
         if (!deletedArr.includes(dateStr)) {
           results.push({
             ...tx,
+            startDate: tx.date,
             date: dateStr,
             occurrenceIndex: occurrence.occurrenceIndex,
             totalOccurrences: occurrence.totalOccurrences,
@@ -161,6 +201,14 @@ export default function FinanceApp({ initialUser }) {
     });
     return sum;
   }, [transactions, currentYear, currentMonth]);
+
+  const includedSavingsTotal = useMemo(
+    () =>
+      savingsBoxes
+        .filter((b) => b.includeInBalance !== false)
+        .reduce((sum, b) => sum + calcStats(b).currentBalance, 0),
+    [savingsBoxes],
+  );
 
   const monthIncome = useMemo(
     () =>
@@ -190,6 +238,52 @@ export default function FinanceApp({ initialUser }) {
   }, [monthTransactions]);
 
   const savings = monthIncome - monthExpenses;
+
+  async function handleAddSavings(box) {
+    const { id, initialAmount, startDate, limitAmount, secondaryRate, ...rest } = box;
+    const dbBox = {
+      ...rest,
+      user_id: initialUser.id,
+      initial_amount: initialAmount,
+      start_date: startDate,
+      limit_amount: limitAmount || null,
+      secondary_rate: secondaryRate || null,
+      include_in_balance: true,
+    };
+    const { data, error } = await supabase.from("savings_boxes").insert(dbBox).select();
+    if (!error && data) {
+      const ins = data[0];
+      setSavingsBoxes((prev) => [
+        ...prev,
+        {
+          ...ins,
+          initialAmount: ins.initial_amount,
+          startDate: ins.start_date,
+          limitAmount: ins.limit_amount,
+          secondaryRate: ins.secondary_rate,
+          includeInBalance: ins.include_in_balance ?? true,
+        },
+      ]);
+      return true;
+    }
+    return false;
+  }
+
+  async function handleDeleteSavings(id) {
+    const { error } = await supabase.from("savings_boxes").delete().eq("id", id);
+    if (!error) setSavingsBoxes((prev) => prev.filter((b) => b.id !== id));
+  }
+
+  async function handleToggleSavingsBalance(id, newValue) {
+    const { error } = await supabase
+      .from("savings_boxes")
+      .update({ include_in_balance: newValue })
+      .eq("id", id);
+    if (!error)
+      setSavingsBoxes((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, includeInBalance: newValue } : b)),
+      );
+  }
 
   async function handleAdd(newTxs) {
     if (!initialUser) return;
@@ -234,6 +328,136 @@ export default function FinanceApp({ initialUser }) {
       setShowModal(false);
     } else {
       console.error("Error inserting transactions:", error);
+    }
+  }
+
+  function handleEditClick(tx) {
+    setEditTarget(tx);
+  }
+
+  async function handleEdit(editedData, scope) {
+    const tx = editTarget;
+    if (!tx) return;
+
+    const dbFields = {
+      type: editedData.type,
+      name: editedData.name,
+      category: editedData.category,
+      amount: editedData.amount,
+      currency: editedData.currency,
+      date: editedData.date,
+    };
+
+    if (scope === "single" || !tx.is_recurring) {
+      const { error } = await supabase
+        .from("transactions")
+        .update(dbFields)
+        .eq("id", tx.originalId);
+      if (!error) {
+        setTransactions((prev) =>
+          prev.map((t) => (t.id === tx.originalId ? { ...t, ...dbFields } : t)),
+        );
+        setEditTarget(null);
+      }
+      return;
+    }
+
+    if (scope === "one") {
+      const baseTx = transactions.find((t) => t.id === tx.originalId);
+      if (!baseTx) return;
+      const newDeleted = baseTx.deleted_dates
+        ? `${baseTx.deleted_dates},${tx.date}`
+        : tx.date;
+      await supabase
+        .from("transactions")
+        .update({ deleted_dates: newDeleted })
+        .eq("id", tx.originalId);
+      const { data, error } = await supabase
+        .from("transactions")
+        .insert({ ...dbFields, user_id: initialUser.id, is_recurring: false })
+        .select();
+      if (!error && data) {
+        setTransactions((prev) => [
+          ...prev.map((t) =>
+            t.id === tx.originalId ? { ...t, deleted_dates: newDeleted } : t,
+          ),
+          { ...data[0], recurringId: null },
+        ]);
+        setEditTarget(null);
+      }
+      return;
+    }
+
+    if (scope === "forward") {
+      const isFirstOccurrence = tx.date === tx.startDate;
+      if (isFirstOccurrence) {
+        await supabase.from("transactions").delete().eq("id", tx.originalId);
+      } else {
+        const d = new Date(tx.date + "T12:00:00");
+        d.setDate(d.getDate() - 1);
+        const newEndDate = d.toISOString().split("T")[0];
+        await supabase
+          .from("transactions")
+          .update({ recurring_end_date: newEndDate, recurring_end_type: "date" })
+          .eq("id", tx.originalId);
+      }
+      const { data, error } = await supabase
+        .from("transactions")
+        .insert({
+          ...dbFields,
+          user_id: initialUser.id,
+          is_recurring: editedData.isRecurring,
+          recurring_frequency: editedData.recurringFrequency,
+          recurring_end_type: editedData.recurringEndType,
+          recurring_end_date: editedData.recurringEndDate || null,
+          recurring_occurrences: editedData.recurringOccurrences
+            ? parseInt(editedData.recurringOccurrences)
+            : null,
+          recurring_id: editedData.isRecurring
+            ? crypto.randomUUID()
+            : null,
+        })
+        .select();
+      if (!error && data) {
+        setTransactions((prev) => {
+          const filtered = isFirstOccurrence
+            ? prev.filter((t) => t.id !== tx.originalId)
+            : prev.map((t) => {
+                const d2 = new Date(tx.date + "T12:00:00");
+                d2.setDate(d2.getDate() - 1);
+                return t.id === tx.originalId
+                  ? { ...t, recurring_end_date: d2.toISOString().split("T")[0], recurring_end_type: "date" }
+                  : t;
+              });
+          return [...filtered, { ...data[0], recurringId: data[0].recurring_id }];
+        });
+        setEditTarget(null);
+      }
+      return;
+    }
+
+    if (scope === "all") {
+      const recurringFields = {
+        is_recurring: editedData.isRecurring,
+        recurring_frequency: editedData.recurringFrequency,
+        recurring_end_type: editedData.recurringEndType,
+        recurring_end_date: editedData.recurringEndDate || null,
+        recurring_occurrences: editedData.recurringOccurrences
+          ? parseInt(editedData.recurringOccurrences)
+          : null,
+      };
+      const { error } = await supabase
+        .from("transactions")
+        .update({ ...dbFields, ...recurringFields })
+        .eq("id", tx.originalId);
+      if (!error) {
+        setTransactions((prev) =>
+          prev.map((t) =>
+            t.id === tx.originalId ? { ...t, ...dbFields, ...recurringFields } : t,
+          ),
+        );
+        setEditTarget(null);
+      }
     }
   }
 
@@ -308,7 +532,7 @@ export default function FinanceApp({ initialUser }) {
         user={initialUser}
       />
 
-      <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <NavigationTabs activeTab={activeTab} setActiveTab={handleSetActiveTab} />
 
       {activeTab === "movements" && (
         <>
@@ -331,9 +555,9 @@ export default function FinanceApp({ initialUser }) {
                 ) : (
                   <>
                     <p
-                      className={`text-xl font-bold leading-snug ${totalBalance >= 0 ? "text-[#818CF8]" : "text-[#F87171]"}`}
+                      className={`text-xl font-bold leading-snug ${totalBalance + includedSavingsTotal >= 0 ? "text-[#818CF8]" : "text-[#F87171]"}`}
                     >
-                      {formatAmount(Math.abs(totalBalance), defaultCurrency)}
+                      {formatAmount(Math.abs(totalBalance + includedSavingsTotal), defaultCurrency)}
                     </p>
                     <p className="text-[10px] text-[#334155] mt-1 font-semibold">
                       {defaultCurrency}
@@ -402,13 +626,21 @@ export default function FinanceApp({ initialUser }) {
             grouped={grouped}
             currentMonth={currentMonth}
             handleDeleteClick={handleDeleteClick}
+            handleEditClick={handleEditClick}
             formatAmount={formatAmount}
           />
         </>
       )}
 
       {activeTab === "savings" && (
-        <SavingsSection triggerAdd={savingsAddTrigger} />
+        <SavingsSection
+          triggerAdd={savingsAddTrigger}
+          boxes={savingsBoxes}
+          hydrated={savingsHydrated}
+          onAdd={handleAddSavings}
+          onDelete={handleDeleteSavings}
+          onToggleBalance={handleToggleSavingsBalance}
+        />
       )}
 
       {/* ── FAB (mobile) global ───────────────────────────────────────── */}
@@ -435,9 +667,16 @@ export default function FinanceApp({ initialUser }) {
         />
       )}
 
+      {editTarget && (
+        <EditTransactionModal
+          tx={editTarget}
+          onSave={handleEdit}
+          onClose={() => setEditTarget(null)}
+        />
+      )}
+
       {deleteTarget && (
         <DeleteModal
-          transaction={deleteTarget}
           onDeleteOne={async () => {
             const txBase = transactions.find(
               (t) => t.id === deleteTarget.originalId,
@@ -457,6 +696,47 @@ export default function FinanceApp({ initialUser }) {
                 prev.map((t) =>
                   t.id === deleteTarget.originalId
                     ? { ...t, deleted_dates: newDeleted }
+                    : t,
+                ),
+              );
+              setDeleteTarget(null);
+            }
+          }}
+          onDeleteFromHere={async () => {
+            const txBase = transactions.find(
+              (t) => t.id === deleteTarget.originalId,
+            );
+            if (!txBase) return;
+
+            // Si es la primera ocurrencia, eliminar toda la transacción
+            if (deleteTarget.date === txBase.date) {
+              const { error } = await supabase
+                .from("transactions")
+                .delete()
+                .eq("id", deleteTarget.originalId);
+              if (!error) {
+                setTransactions((prev) =>
+                  prev.filter((t) => t.id !== deleteTarget.originalId),
+                );
+                setDeleteTarget(null);
+              }
+              return;
+            }
+
+            // Acortar la recurrencia al día anterior al seleccionado
+            const d = new Date(deleteTarget.date + "T12:00:00");
+            d.setDate(d.getDate() - 1);
+            const newEndDate = d.toISOString().split("T")[0];
+
+            const { error } = await supabase
+              .from("transactions")
+              .update({ recurring_end_date: newEndDate, recurring_end_type: "date" })
+              .eq("id", deleteTarget.originalId);
+            if (!error) {
+              setTransactions((prev) =>
+                prev.map((t) =>
+                  t.id === deleteTarget.originalId
+                    ? { ...t, recurring_end_date: newEndDate, recurring_end_type: "date" }
                     : t,
                 ),
               );

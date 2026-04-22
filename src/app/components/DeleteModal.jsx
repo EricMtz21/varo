@@ -1,6 +1,6 @@
 "use client";
 
-export default function DeleteModal({ transaction, onDeleteOne, onDeleteAll, onCancel }) {
+export default function DeleteModal({ onDeleteOne, onDeleteFromHere, onDeleteAll, onCancel }) {
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
       <div
@@ -18,6 +18,12 @@ export default function DeleteModal({ transaction, onDeleteOne, onDeleteAll, onC
             className="w-full py-3 rounded-xl bg-[#1A2537] text-[#E2E8F0] text-sm font-semibold hover:bg-[#1E2D45] transition-colors cursor-pointer"
           >
             Solo este
+          </button>
+          <button
+            onClick={onDeleteFromHere}
+            className="w-full py-3 rounded-xl bg-[#1A2537] text-[#FBBF24] text-sm font-semibold hover:bg-[#1E2D45] transition-colors cursor-pointer border border-[#FBBF24]/20"
+          >
+            Este y los siguientes
           </button>
           <button
             onClick={onDeleteAll}
