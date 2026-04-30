@@ -2,6 +2,7 @@
 
 import {
   CircleNotchIcon,
+  PencilSimpleIcon,
   TrashIcon,
   TrayIcon,
   XIcon,
@@ -54,7 +55,12 @@ const selectCls =
 
 function AddSavingsModal({ onAdd, onClose, nextColor }) {
   const [isExiting, setIsExiting] = useState(false);
-  const today = new Date().toISOString().split("T")[0];
+  const d = new Date();
+  const today = [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
 
   const [form, setForm] = useState({
     name: "",
@@ -288,9 +294,258 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
   );
 }
 
+// ─── Edit Savings Modal ─────────────────────────────────────────────────────
+
+function EditSavingsModal({ box, onSave, onClose }) {
+  const [isExiting, setIsExiting] = useState(false);
+  const d = new Date();
+  const today = [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  const [form, setForm] = useState({
+    name: box.name,
+    initialAmount: String(box.initialAmount),
+    rate: String(box.rate),
+    hasLimit: !!(box.limitAmount),
+    limitAmount: box.limitAmount ? String(box.limitAmount) : "",
+    secondaryRate: box.secondaryRate ? String(box.secondaryRate) : "",
+    currency: box.currency,
+    startDate: today,
+    color: box.color,
+  });
+
+  useEffect(() => {
+    document.body.classList.add("modal-open");
+    return () => document.body.classList.remove("modal-open");
+  }, []);
+
+  function handleClose() {
+    setIsExiting(true);
+    setTimeout(onClose, 260);
+  }
+
+  function set(key, value) {
+    setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  const amount = parseFloat(form.initialAmount);
+  const rate = parseFloat(form.rate);
+  const hasPreview = amount > 0 && rate > 0;
+  const isValid = form.name.trim() && hasPreview && form.startDate;
+
+  function handleSubmit() {
+    if (!isValid) return;
+    onSave(box.id, {
+      name: form.name.trim(),
+      initialAmount: amount,
+      rate,
+      currency: form.currency,
+      startDate: form.startDate,
+      color: form.color,
+      limitAmount: form.hasLimit ? parseFloat(form.limitAmount) || null : null,
+      secondaryRate: form.hasLimit ? parseFloat(form.secondaryRate) || null : null,
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div
+        className={`absolute inset-0 bg-black/75 backdrop-blur-sm ${isExiting ? "animate-fade-out" : "animate-fade-in"}`}
+        onClick={handleClose}
+      />
+      <div
+        className={`relative w-full sm:max-w-md bg-[#0c1018]/80 backdrop-blur-sm border-t border-[#1E2D45] sm:border sm:rounded-xl max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+      >
+        <div className="w-10 h-1 bg-[#1E2D45] rounded-full mx-auto mt-3 mb-1 sm:hidden" />
+        <div className="p-5 sm:p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                style={{ backgroundColor: form.color + "22", color: form.color }}
+              >
+                {form.name ? form.name.slice(0, 2).toUpperCase() : "??"}
+              </div>
+              <h2 className="font-bold text-lg text-[#E2E8F0]">Editar caja</h2>
+            </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-2 rounded-xl text-[#64748B] hover:text-[#E2E8F0] hover:bg-[#1A2537] transition-colors cursor-pointer"
+              aria-label="Cerrar"
+            >
+              <XIcon size={18} />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <input
+              type="text"
+              placeholder="Nombre (ej. Nu, CETES, BBVA)"
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+              className={inputCls}
+              maxLength={40}
+            />
+
+            <div className="flex gap-2">
+              <input
+                type="number"
+                placeholder="Monto inicial"
+                min="0.01"
+                step="0.01"
+                value={form.initialAmount}
+                onChange={(e) => set("initialAmount", e.target.value)}
+                className={`${inputCls} flex-1`}
+              />
+              <select
+                value={form.currency}
+                onChange={(e) => set("currency", e.target.value)}
+                className={selectCls}
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="relative">
+              <input
+                type="number"
+                placeholder="Tasa anual (%)"
+                min="0.01"
+                step="0.01"
+                max="999"
+                value={form.rate}
+                onChange={(e) => set("rate", e.target.value)}
+                className={`${inputCls} pr-16`}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#475569] font-bold pointer-events-none">
+                % base
+              </span>
+            </div>
+
+            <div className="bg-[#141D2E] rounded-xl p-3 border border-[#1E2D45]">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.hasLimit}
+                  onChange={(e) => set("hasLimit", e.target.checked)}
+                  className="accent-[#818CF8] w-4 h-4"
+                />
+                <span className="text-xs font-bold text-[#E2E8F0] select-none">
+                  Tasa por límite (ej. Nu)
+                </span>
+              </label>
+
+              {form.hasLimit && (
+                <div className="mt-3 grid grid-cols-2 gap-2 animate-fade-up">
+                  <div>
+                    <label className="text-[10px] text-[#475569] font-bold uppercase tracking-widest block mb-1">
+                      Tope base ($)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Monto max"
+                      min="0"
+                      value={form.limitAmount}
+                      onChange={(e) => set("limitAmount", e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#475569] font-bold uppercase tracking-widest block mb-1">
+                      Tasa excedente (%)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="%"
+                      min="0"
+                      step="0.01"
+                      value={form.secondaryRate}
+                      onChange={(e) => set("secondaryRate", e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="text-[11px] text-[#475569] font-bold uppercase tracking-widest mb-1.5 block">
+                Balance a partir de
+              </label>
+              <input
+                type="date"
+                value={form.startDate}
+                onChange={(e) => set("startDate", e.target.value)}
+                className={inputCls}
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-[#475569] font-bold uppercase tracking-widest mb-1.5 block">
+                Color
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {BOX_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => set("color", c)}
+                    className={`w-7 h-7 rounded-lg transition-all cursor-pointer ${form.color === c ? "ring-2 ring-white scale-110" : "opacity-60 hover:opacity-100"}`}
+                    style={{ backgroundColor: c }}
+                    aria-label={`Color ${c}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {hasPreview && (
+            <div className="mt-4 bg-[#141D2E] rounded-xl p-4 border border-[#1E2D45] animate-fade-up">
+              <p className="text-[11px] text-[#475569] font-bold uppercase tracking-widest mb-3">
+                Ganancias estimadas
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Por día", value: amount * (rate / 100 / 365) },
+                  { label: "Por mes", value: amount * (rate / 100 / 12) },
+                  { label: "Por año", value: amount * (rate / 100) },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p className="text-[10px] text-[#475569] font-bold uppercase mb-1">
+                      {label}
+                    </p>
+                    <p className="text-sm font-bold text-[#34D399]">
+                      +{formatAmount(value, form.currency)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isValid}
+            className="w-full py-4 rounded-xl font-bold text-sm mt-5 bg-[#818CF8] text-[#07090F] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+          >
+            Guardar cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Savings box card ───────────────────────────────────────────────────────
 
-function SavingsBox({ box, onDelete, onToggleBalance, delay = 0 }) {
+function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
   const { currentBalance, totalEarned, todayEarnings } = calcStats(box);
 
   const effectiveRate =
@@ -334,6 +589,13 @@ function SavingsBox({ box, onDelete, onToggleBalance, delay = 0 }) {
             {Number(effectiveRate.toFixed(2))}%{" "}
             {box.limitAmount ? "real" : "anual"}
           </span>
+          <button
+            onClick={() => onEdit(box)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-[#475569] hover:text-[#818CF8] hover:bg-[#818CF8]/10 cursor-pointer"
+            aria-label={`Editar ${box.name}`}
+          >
+            <PencilSimpleIcon size={18} />
+          </button>
           <button
             onClick={() => onDelete(box.id)}
             className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-[#475569] hover:text-[#F87171] hover:bg-[#F87171]/10 cursor-pointer"
@@ -413,9 +675,11 @@ export default function SavingsSection({
   hydrated,
   onAdd,
   onDelete,
+  onEdit,
   onToggleBalance,
 }) {
   const [showModal, setShowModal] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
   // Open modal only when triggerAdd actually increases (not on component mount)
   const prevTriggerRef = useRef(triggerAdd);
@@ -427,6 +691,11 @@ export default function SavingsSection({
   async function handleAdd(box) {
     const success = await onAdd(box);
     if (success) setShowModal(false);
+  }
+
+  async function handleEdit(id, updates) {
+    const success = await onEdit(id, updates);
+    if (success) setEditTarget(null);
   }
 
   const nextColor = BOX_COLORS[boxes.length % BOX_COLORS.length];
@@ -528,6 +797,7 @@ export default function SavingsSection({
               key={box.id}
               box={box}
               onDelete={onDelete}
+              onEdit={setEditTarget}
               onToggleBalance={onToggleBalance}
               delay={i * 80}
             />
@@ -549,12 +819,19 @@ export default function SavingsSection({
         </div>
       )}
 
-      {/* Modal */}
       {showModal && (
         <AddSavingsModal
           onAdd={handleAdd}
           onClose={() => setShowModal(false)}
           nextColor={nextColor}
+        />
+      )}
+
+      {editTarget && (
+        <EditSavingsModal
+          box={editTarget}
+          onSave={handleEdit}
+          onClose={() => setEditTarget(null)}
         />
       )}
     </div>

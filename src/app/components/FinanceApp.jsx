@@ -14,8 +14,16 @@ import { PlusIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react";
 import { MONTHS } from "../utils/constants";
 import { formatAmount, getOccurrencesInMonth, getOccurrencesUpToMonth, calcStats } from "../utils/format";
 import { createClient } from "../../utils/supabase/client";
-import Grainient from "@/components/Grainient";
 import DarkVeil from "@/components/DarkVeil";
+
+function localDateStr(ts) {
+  const d = new Date(ts);
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
+}
 
 export default function FinanceApp({ initialUser }) {
   const [transactions, setTransactions] = useState([]);
@@ -122,7 +130,7 @@ export default function FinanceApp({ initialUser }) {
           data.map((b) => ({
             ...b,
             initialAmount: b.initial_amount,
-            startDate: b.start_date,
+            startDate: localDateStr(b.start_date),
             limitAmount: b.limit_amount,
             secondaryRate: b.secondary_rate,
             includeInBalance: b.include_in_balance ?? true,
@@ -245,7 +253,7 @@ export default function FinanceApp({ initialUser }) {
       ...rest,
       user_id: initialUser.id,
       initial_amount: initialAmount,
-      start_date: startDate,
+      start_date: new Date(startDate + "T00:00:00").toISOString(),
       limit_amount: limitAmount || null,
       secondary_rate: secondaryRate || null,
       include_in_balance: true,
@@ -258,12 +266,34 @@ export default function FinanceApp({ initialUser }) {
         {
           ...ins,
           initialAmount: ins.initial_amount,
-          startDate: ins.start_date,
+          startDate: localDateStr(ins.start_date),
           limitAmount: ins.limit_amount,
           secondaryRate: ins.secondary_rate,
           includeInBalance: ins.include_in_balance ?? true,
         },
       ]);
+      return true;
+    }
+    return false;
+  }
+
+  async function handleEditSavings(id, updates) {
+    const { initialAmount, startDate, limitAmount, secondaryRate, ...rest } = updates;
+    const dbUpdates = {
+      ...rest,
+      initial_amount: initialAmount,
+      start_date: new Date(startDate + "T00:00:00").toISOString(),
+      limit_amount: limitAmount || null,
+      secondary_rate: secondaryRate || null,
+    };
+    const { error } = await supabase
+      .from("savings_boxes")
+      .update(dbUpdates)
+      .eq("id", id);
+    if (!error) {
+      setSavingsBoxes((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, ...updates } : b)),
+      );
       return true;
     }
     return false;
@@ -462,21 +492,20 @@ export default function FinanceApp({ initialUser }) {
   }
 
   async function handleDeleteClick(tx) {
-    if (tx.is_recurring) {
-      setDeleteTarget(tx);
-    } else {
-      const { error } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", tx.originalId || tx.id);
-      if (!error) {
-        setTransactions((prev) =>
-          prev.filter((t) => t.id !== (tx.originalId || tx.id)),
-        );
-      } else {
-        console.error("Error deleting transaction:", error);
-      }
+    setDeleteTarget(tx);
+  }
+
+  async function confirmDeleteSingle(tx) {
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .eq("id", tx.originalId || tx.id);
+    if (!error) {
+      setTransactions((prev) =>
+        prev.filter((t) => t.id !== (tx.originalId || tx.id)),
+      );
     }
+    setDeleteTarget(null);
   }
 
   return (
@@ -639,6 +668,7 @@ export default function FinanceApp({ initialUser }) {
           hydrated={savingsHydrated}
           onAdd={handleAddSavings}
           onDelete={handleDeleteSavings}
+          onEdit={handleEditSavings}
           onToggleBalance={handleToggleSavingsBalance}
         />
       )}
@@ -675,7 +705,14 @@ export default function FinanceApp({ initialUser }) {
         />
       )}
 
-      {deleteTarget && (
+      {deleteTarget && !deleteTarget.is_recurring && (
+        <DeleteModal
+          onConfirm={() => confirmDeleteSingle(deleteTarget)}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+
+      {deleteTarget && deleteTarget.is_recurring && (
         <DeleteModal
           onDeleteOne={async () => {
             const txBase = transactions.find(

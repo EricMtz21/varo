@@ -14,6 +14,7 @@ const CURRENCIES = ["MXN", "USD", "EUR", "CAD", "GBP"];
 const FREQ_LABELS = {
   daily: "Diario",
   weekly: "Semanal",
+  biweekly: "Quincenal",
   monthly: "Mensual",
   yearly: "Anual",
 };
@@ -22,7 +23,7 @@ const END_TYPE_LABELS = {
   date: "En fecha",
   occurrences: "N veces",
 };
-const MAX_BY_FREQ = { daily: 365, weekly: 156, monthly: 60, yearly: 20 };
+const MAX_BY_FREQ = { daily: 365, weekly: 156, biweekly: 78, monthly: 60, yearly: 20 };
 
 function uid() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -59,6 +60,7 @@ function generateRecurringDates(
     const next = new Date(current);
     if (frequency === "daily") next.setDate(next.getDate() + 1);
     else if (frequency === "weekly") next.setDate(next.getDate() + 7);
+    else if (frequency === "biweekly") next.setDate(next.getDate() + 15);
     else if (frequency === "monthly") next.setMonth(next.getMonth() + 1);
     else if (frequency === "yearly") next.setFullYear(next.getFullYear() + 1);
     current = next;
@@ -116,7 +118,12 @@ function PillGroup({ options, value, onChange, activeClass }) {
 // ─── Modal ──────────────────────────────────────────────────────────────────
 
 export default function AddTransactionModal({ onAdd, onClose }) {
-  const today = new Date().toISOString().split("T")[0];
+  const d = new Date();
+  const today = [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
 
   const [form, setForm] = useState({
     type: "expense",

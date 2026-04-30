@@ -67,13 +67,14 @@ export function getOccurrencesInMonth(tx, year, month) {
     const next = new Date(current);
     if (freq === "daily") next.setDate(next.getDate() + 1);
     else if (freq === "weekly") next.setDate(next.getDate() + 7);
+    else if (freq === "biweekly") next.setDate(next.getDate() + 15);
     else if (freq === "monthly") next.setMonth(next.getMonth() + 1);
     else if (freq === "yearly") next.setFullYear(next.getFullYear() + 1);
     else break; // Fallback
-    
+
     current = next;
   }
-  
+
   return dates;
 }
 
@@ -93,7 +94,6 @@ export function calcStats(box) {
 
   const totalDays = Math.max(0, (now - start) / (1000 * 60 * 60 * 24));
   const fullDays = Math.floor(totalDays);
-  const fractionalDay = totalDays - fullDays;
 
   let currentBalance = parseFloat(box.initialAmount);
   let todayEarnings = 0;
@@ -113,10 +113,6 @@ export function calcStats(box) {
     } else {
       currentBalance += dayInterest;
     }
-  }
-
-  if (fractionalDay > 0) {
-    currentBalance += todayEarnings * fractionalDay;
   }
 
   const totalEarned = currentBalance - box.initialAmount;
@@ -159,12 +155,13 @@ export function getOccurrencesUpToMonth(tx, year, month) {
     const next = new Date(current);
     if (freq === "daily") next.setDate(next.getDate() + 1);
     else if (freq === "weekly") next.setDate(next.getDate() + 7);
+    else if (freq === "biweekly") next.setDate(next.getDate() + 15);
     else if (freq === "monthly") next.setMonth(next.getMonth() + 1);
     else if (freq === "yearly") next.setFullYear(next.getFullYear() + 1);
     else break; // Fallback
-    
+
     current = next;
   }
-  
+
   return dates;
 }

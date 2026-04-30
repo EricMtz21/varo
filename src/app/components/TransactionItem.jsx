@@ -115,6 +115,7 @@ export default function TransactionItem({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  onSelect(null);
                   onEdit(tx);
                 }}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-[#818CF8] hover:bg-[#818CF8]/15 transition-colors cursor-pointer whitespace-nowrap"
@@ -126,6 +127,7 @@ export default function TransactionItem({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  onSelect(null);
                   onDelete(tx);
                 }}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-[#F87171] hover:bg-[#F87171]/15 transition-colors cursor-pointer whitespace-nowrap"

@@ -10,7 +10,7 @@ import {
 } from "./categoryConfig";
 
 const CURRENCIES = ["MXN", "USD", "EUR", "CAD", "GBP"];
-const FREQ_LABELS = { daily: "Diario", weekly: "Semanal", monthly: "Mensual", yearly: "Anual" };
+const FREQ_LABELS = { daily: "Diario", weekly: "Semanal", biweekly: "Quincenal", monthly: "Mensual", yearly: "Anual" };
 const END_TYPE_LABELS = { never: "Nunca", date: "En fecha", occurrences: "N veces" };
 
 const XIcon = () => (
