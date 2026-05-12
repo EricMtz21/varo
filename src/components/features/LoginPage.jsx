@@ -21,7 +21,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-dvh p-4">
+    <div className="flex flex-col h-dvh p-4 overflow-hidden">
       <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none overflow-hidden bg-[#07090F]">
         <Beams
           beamWidth={3}
