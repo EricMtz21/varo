@@ -1,5 +1,6 @@
 "use client";
 
+import Beams from "@/components/ui/Beams";
 import { createClient } from "@/lib/supabase/client";
 import { GoogleLogoIcon } from "@phosphor-icons/react";
 import { useState } from "react";
@@ -20,33 +21,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-dvh items-center justify-center p-6 bg-background relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-muted rounded-full blur-3xl opacity-50 mix-blend-multiply dark:mix-blend-lighten pointer-events-none" />
+    <div className="flex flex-col min-h-dvh p-4">
+      <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none overflow-hidden bg-[#07090F]">
+        <Beams
+          beamWidth={3}
+          beamHeight={30}
+          beamNumber={20}
+          lightColor="#e1e1e1"
+          speed={2}
+          noiseIntensity={1.75}
+          scale={0.2}
+          rotation={30}
+        />
+      </div>
 
-      <div className="relative z-10 flex flex-col items-center w-full max-w-sm animate-fade-up">
-        <div className="mb-6 bg-card p-4 rounded-3xl shadow-sm border border-border">
-          <LogoFull className="h-auto w-32 text-foreground" />
-        </div>
+      <LogoFull className="h-auto w-36 text-[#e1e1e1] mt-8 mb-2 pl-2" />
 
-        <h1 className="text-2xl font-bold text-foreground mb-2 text-center">
-          Bienvenido
-        </h1>
-        <p className="text-muted-foreground mb-10 text-center font-medium text-sm leading-relaxed max-w-65">
-          Tus finanzas claras,<br /> decisiones inteligentes.
-        </p>
+      <p className="text-[#e1e1e1] mb-8 font-medium text-sm pl-2">
+        Tus finanzas claras,
+        <br /> decisiones inteligentes.
+      </p>
 
+      <div className="flex-1 flex items-end p-2 max-w-sm w-full animate-fade-up">
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 bg-foreground text-background hover:bg-foreground/90 px-6 py-4 rounded-2xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 bg-[#e1e1e1] text-[#07090F] hover:bg-gray-200 px-6 py-4 rounded-sm font-bold transition-all active:scale-95 disabled:opacity-50"
         >
           {loading ? (
-            <span className="w-5 h-5 border-2 border-muted-foreground border-t-current rounded-full animate-spin" />
+            <span className="w-5 h-5 border-2 border-gray-400 border-t-[#07090F] rounded-full animate-spin" />
           ) : (
-            <GoogleLogoIcon size={22} weight="bold" />
+            <GoogleLogoIcon size={22} weight="bold" color="#07090F" />
           )}
-          <span>{loading ? "Conectando..." : "Continuar con Google"}</span>
+          <span>{loading ? "Conectando..." : "Iniciar con Google"}</span>
         </button>
       </div>
     </div>
