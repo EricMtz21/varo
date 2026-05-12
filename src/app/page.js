@@ -1,6 +1,6 @@
-import FinanceApp from "./components/FinanceApp";
-import LoginPage from "./components/LoginPage";
-import { createClient } from "../utils/supabase/server";
+import FinanceApp from "@/components/features/FinanceApp";
+import LoginPage from "@/components/features/LoginPage";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
   const supabase = await createClient();

@@ -10,6 +10,20 @@ const nunitoSans = Nunito_Sans({
 export const metadata = {
   title: "Varo",
   description: "Tu gestor de finanzas personales",
+  icons: {
+    icon: [
+      {
+        media: '(prefers-color-scheme: light)',
+        url: '/favicon-light.png?v=2',
+        href: '/favicon-light.png?v=2',
+      },
+      {
+        media: '(prefers-color-scheme: dark)',
+        url: '/favicon-dark.png?v=2',
+        href: '/favicon-dark.png?v=2',
+      },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
