@@ -1,11 +1,11 @@
 "use client";
 
 import {
+  MonitorIcon,
   MoonIcon,
   PlusIcon,
   SignOutIcon,
   SunIcon,
-  UserIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +18,7 @@ export default function Header({
   activeTab,
   onAddClick,
   user,
-  darkMode,
+  theme,
   onToggleDark,
 }) {
   const router = useRouter();
@@ -94,63 +94,61 @@ export default function Header({
             onClick={closeMenu}
           />
           <div
-            className={`relative w-[80%] max-w-sm h-dvh bg-background border-r border-border flex flex-col ${isExiting ? "animate-slide-out-left" : "animate-slide-in-left"}`}
+            className={`relative w-[72%] max-w-xs h-dvh bg-background border-r border-border flex flex-col ${isExiting ? "animate-slide-out-left" : "animate-slide-in-left"}`}
           >
-            {/* Cabecera del Perfil */}
-            <div className="p-6 border-b border-border bg-card pt-8">
-              <div className="flex justify-between items-start mb-5">
-                <div className="w-16 h-16 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 shadow-sm">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <UserIcon size={32} className="text-muted-foreground" />
-                  )}
+            {/* Perfil */}
+            <div className="p-4 border-b border-border flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <Avatar className="w-9 h-9 shrink-0">
+                  <AvatarImage src={avatarUrl} referrerPolicy="no-referrer" />
+                  <AvatarFallback className="text-xs font-semibold">
+                    {fullName.split(" ").map((n) => n[0]).join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate leading-tight">
+                    {fullName}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate leading-tight">
+                    {email}
+                  </p>
                 </div>
-                <button
-                  onClick={closeMenu}
-                  className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <XIcon size={20} />
-                </button>
               </div>
-              <h2 className="font-bold text-xl text-foreground truncate">
-                {fullName}
-              </h2>
-              <p className="text-sm text-muted-foreground font-medium truncate mt-0.5">
-                {email}
-              </p>
+              <button
+                onClick={closeMenu}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0"
+              >
+                <XIcon size={16} />
+              </button>
             </div>
 
-            {/* Opciones o Información Adicional */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            {/* Opciones */}
+            <div className="flex-1 p-3">
               <button
                 onClick={onToggleDark}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary text-foreground hover:bg-muted transition-colors cursor-pointer active:scale-95"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer text-sm"
               >
-                {darkMode ? (
-                  <SunIcon size={20} className="text-foreground" />
+                {theme === "dark" ? (
+                  <MoonIcon size={16} />
+                ) : theme === "light" ? (
+                  <SunIcon size={16} />
                 ) : (
-                  <MoonIcon size={20} className="text-foreground" />
+                  <MonitorIcon size={16} />
                 )}
-                <span className="font-medium text-sm">
-                  {darkMode ? "Modo claro" : "Modo oscuro"}
+                <span>
+                  {theme === "dark" ? "Oscuro" : theme === "light" ? "Claro" : "Sistema"}
                 </span>
               </button>
             </div>
 
-            {/* Pie / Botón de Cerrar Sesión */}
-            <div className="p-4 border-t border-border bg-background">
+            {/* Cerrar sesión */}
+            <div className="p-3 border-t border-border">
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center justify-center gap-2 bg-secondary hover:bg-destructive/10 text-destructive p-3.5 rounded-xl font-bold transition-colors cursor-pointer active:scale-95"
+                className="w-full flex items-center justify-end gap-2.5 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors cursor-pointer text-sm"
               >
-                <SignOutIcon size={20} weight="bold" />
-                Cerrar sesión
+                <span>Cerrar sesión</span>
+                <SignOutIcon size={16} />
               </button>
             </div>
           </div>

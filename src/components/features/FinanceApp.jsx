@@ -40,10 +40,11 @@ export default function FinanceApp({ initialUser }) {
   const [editTarget, setEditTarget] = useState(null);
   const [hydrated, setHydrated] = useState(false);
   const [activeTab, setActiveTab] = useState("movements");
-  const [darkMode, setDarkMode] = useState(
+  const [theme, setTheme] = useState(
     () =>
-      typeof window !== "undefined" &&
-      localStorage.getItem("darkMode") === "true",
+      typeof window !== "undefined"
+        ? (localStorage.getItem("theme") ?? "system")
+        : "system",
   );
 
   useEffect(() => {
@@ -53,13 +54,25 @@ export default function FinanceApp({ initialUser }) {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+    const apply = () => {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.classList.toggle(
+        "dark",
+        theme === "dark" || (theme === "system" && prefersDark),
+      );
+    };
+    apply();
+    if (theme !== "system") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, [theme]);
 
-  function toggleDarkMode() {
-    const next = !darkMode;
-    setDarkMode(next);
-    localStorage.setItem("darkMode", String(next));
+  function toggleTheme() {
+    const cycle = { system: "dark", dark: "light", light: "system" };
+    const next = cycle[theme];
+    setTheme(next);
+    localStorage.setItem("theme", next);
   }
 
   function handleSetActiveTab(tab) {
@@ -592,8 +605,8 @@ export default function FinanceApp({ initialUser }) {
           else setShowModal(true);
         }}
         user={initialUser}
-        darkMode={darkMode}
-        onToggleDark={toggleDarkMode}
+        theme={theme}
+        onToggleDark={toggleTheme}
       />
 
       {/* <div className="px-4 md:px-0 pt-3 max-w-2xl mx-auto">
