@@ -3,11 +3,19 @@
 import Beams from "@/components/ui/Beams";
 import { createClient } from "@/lib/supabase/client";
 import { GoogleLogoIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogoFull } from "@/components/ui/LogoFull";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const update = () =>
+      document.documentElement.style.setProperty("--app-height", `${window.innerHeight}px`);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -21,7 +29,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col h-dvh pt-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-hidden">
+    <div className="flex flex-col pt-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-hidden" style={{ height: "var(--app-height, 100dvh)" }}>
       <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none overflow-hidden bg-[#07090F]">
         <Beams
           beamWidth={3}
