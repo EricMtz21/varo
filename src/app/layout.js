@@ -46,7 +46,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={`${nunitoSans.variable} h-full`}>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full overscroll-y-none">{children}</body>
     </html>
   );
 }
