@@ -27,16 +27,16 @@ export default function NavigationTabs({ activeTab, setActiveTab }) {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex-1 flex flex-col items-start gap-3 p-4 rounded-xl border transition-all relative overflow-hidden pb-16 cursor-pointer text-left ${
+              className={`flex-1 flex flex-col items-start gap-3 p-4 rounded-xl border transition-all relative overflow-hidden pb-16 cursor-pointer text-left select-none active:scale-[0.97] ${
                 isActive
-                  ? "bg-card border-border shadow-xs"
-                  : "bg-muted/60 border-transparent hover:bg-muted"
+                  ? "bg-card border-border shadow-md"
+                  : "bg-transparent border-border/40 hover:bg-muted/30 hover:border-border/70"
               }`}
             >
               <div>
                 <p
                   className={`text-[13px] font-bold leading-tight transition-colors ${
-                    isActive ? "text-foreground" : "text-muted-foreground"
+                    isActive ? "text-foreground" : "text-muted-foreground/55"
                   }`}
                 >
                   {label}
@@ -45,14 +45,16 @@ export default function NavigationTabs({ activeTab, setActiveTab }) {
                   className={`text-[11px] mt-0.5 leading-snug transition-colors ${
                     isActive
                       ? "text-muted-foreground"
-                      : "text-muted-foreground/60"
+                      : "text-muted-foreground/35"
                   }`}
                 >
                   {sub}
                 </p>
               </div>
               <div
-                className={`w-24 h-24 flex items-center justify-center transition-all absolute -bottom-8 -right-2`}
+                className={`w-24 h-24 flex items-center justify-center transition-all absolute -bottom-8 -right-2 ${
+                  isActive ? "opacity-100" : "opacity-35"
+                }`}
               >
                 <Image
                   src={icon}

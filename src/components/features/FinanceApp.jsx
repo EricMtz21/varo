@@ -10,7 +10,12 @@ import SummaryCard from "./SummaryCard";
 import MonthSelector from "./MonthSelector";
 import TransactionList from "./TransactionList";
 import DeleteModal from "./DeleteModal";
-import { PlusIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import {
+  PlusIcon,
+  ArrowsClockwiseIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "@phosphor-icons/react";
 import { MONTHS } from "@/utils/constants";
 import {
   formatAmount,
@@ -40,12 +45,24 @@ export default function FinanceApp({ initialUser }) {
   const [editTarget, setEditTarget] = useState(null);
   const [hydrated, setHydrated] = useState(false);
   const [activeTab, setActiveTab] = useState("movements");
-  const [theme, setTheme] = useState(
-    () =>
-      typeof window !== "undefined"
-        ? (localStorage.getItem("theme") ?? "system")
-        : "system",
+  const [theme, setTheme] = useState(() =>
+    typeof window !== "undefined"
+      ? (localStorage.getItem("theme") ?? "system")
+      : "system",
   );
+  const [balanceVisible, setBalanceVisible] = useState(() =>
+    typeof window !== "undefined"
+      ? localStorage.getItem("balanceVisible") !== "false"
+      : true,
+  );
+
+  function toggleBalanceVisible() {
+    setBalanceVisible((prev) => {
+      const next = !prev;
+      localStorage.setItem("balanceVisible", String(next));
+      return next;
+    });
+  }
 
   useEffect(() => {
     const saved = localStorage.getItem("activeTab");
@@ -55,7 +72,9 @@ export default function FinanceApp({ initialUser }) {
 
   useEffect(() => {
     const apply = () => {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
       document.documentElement.classList.toggle(
         "dark",
         theme === "dark" || (theme === "system" && prefersDark),
@@ -620,16 +639,31 @@ export default function FinanceApp({ initialUser }) {
       {activeTab === "movements" && (
         <>
           {/* ── Summary cards ──────────────────────────────────────────────── */}
-          <section className="px-3 md:px-0 md:pt-3 pb-1 max-w-2xl mx-auto mt-2">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <section className="px-3 md:px-0 md:pt-3 max-w-2xl mx-auto my-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {/* Balance – full width on mobile */}
               <div
-                className="col-span-2 sm:col-span-1 bg-card rounded-xl p-5 border border-border shadow-xs animate-fade-up relative overflow-hidden"
+                className="col-span-2 sm:col-span-1 p-1 animate-fade-up relative overflow-hidden"
                 style={{ animationDelay: "0ms" }}
               >
-                <p className="text-[11px] text-muted-foreground mb-2 font-medium tracking-wide uppercase">
-                  Ahorro total
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[11px] text-muted-foreground font-medium tracking-wide uppercase">
+                    Ahorro total
+                  </p>
+                  <button
+                    onClick={toggleBalanceVisible}
+                    className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    aria-label={
+                      balanceVisible ? "Ocultar saldo" : "Mostrar saldo"
+                    }
+                  >
+                    {balanceVisible ? (
+                      <EyeSlashIcon size={15} />
+                    ) : (
+                      <EyeIcon size={15} />
+                    )}
+                  </button>
+                </div>
                 {!hydrated ? (
                   <div className="space-y-2 py-1">
                     <div className="h-6 w-32 bg-muted/50 rounded-sm animate-pulse" />
@@ -638,15 +672,17 @@ export default function FinanceApp({ initialUser }) {
                 ) : (
                   <>
                     <p
-                      className={`text-2xl font-extrabold leading-snug ${totalBalance + includedSavingsTotal >= 0 ? "text-foreground" : "text-destructive"}`}
+                      className={`text-4xl font-medium leading-snug ${totalBalance + includedSavingsTotal >= 0 ? "text-foreground" : "text-destructive"}`}
                     >
-                      {formatAmount(
-                        Math.abs(totalBalance + includedSavingsTotal),
-                        defaultCurrency,
-                      )}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-1 font-semibold">
-                      {defaultCurrency}
+                      {balanceVisible
+                        ? formatAmount(
+                            Math.abs(totalBalance + includedSavingsTotal),
+                            defaultCurrency,
+                          )
+                        : "█ █ █ █ █ █"}{" "}
+                      <span className="text-[10px] text-muted-foreground mt-1 font-semibold">
+                        {defaultCurrency}
+                      </span>
                     </p>
                   </>
                 )}
@@ -683,7 +719,7 @@ export default function FinanceApp({ initialUser }) {
 
             {(monthIncome > 0 || monthExpenses > 0) && (
               <div
-                className="mt-3 bg-card rounded-xl px-5 py-3 border border-border shadow-xs flex items-center justify-between animate-fade-up"
+                className="mt-2 p-2 flex items-center justify-between bg-card rounded-sm px-3 animate-fade-up"
                 style={{ animationDelay: "200ms" }}
               >
                 <span className="text-xs text-muted-foreground font-medium">

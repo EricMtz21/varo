@@ -580,7 +580,7 @@ function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
   return (
     <div
       onClick={() => onEdit(box)}
-      className="bg-card rounded-xl p-5 border border-border shadow-sm group hover:border-muted-foreground transition-colors cursor-pointer animate-fade-up relative"
+      className="bg-card rounded-sm p-4 group hover:border-muted-foreground transition-colors cursor-pointer animate-fade-up relative"
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="absolute top-4 right-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
@@ -727,7 +727,7 @@ export default function SavingsSection({
       {boxes.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div
-            className="bg-card rounded-xl shadow-xs border border-border p-4 animate-fade-up"
+            className="p-2 animate-fade-up"
             style={{ animationDelay: "0ms" }}
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">
@@ -741,7 +741,7 @@ export default function SavingsSection({
             )}
           </div>
           <div
-            className="bg-card rounded-xl shadow-xs border border-border p-4 animate-fade-up"
+            className="p-2 animate-fade-up"
             style={{ animationDelay: "70ms" }}
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">

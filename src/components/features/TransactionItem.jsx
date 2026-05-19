@@ -51,7 +51,7 @@ export default function TransactionItem({
       <div
         ref={rowRef}
         onClick={handleRowClick}
-        className={`flex items-center gap-3 rounded-xl px-4 py-3.5 transition-colors border cursor-pointer animate-fade-up ${
+        className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors border cursor-pointer animate-fade-up ${
           isSelected
             ? "bg-muted border-border"
             : "bg-card border-transparent hover:bg-muted hover:border-border"

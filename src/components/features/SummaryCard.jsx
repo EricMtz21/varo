@@ -8,7 +8,7 @@ export default function SummaryCard({
   loading,
 }) {
   return (
-    <div className="bg-card rounded-xl p-5 border border-border shadow-xs">
+    <div className="p-1">
       <p className="text-[11px] text-muted-foreground mb-2 font-medium tracking-wide uppercase">
         {label}
       </p>
@@ -21,10 +21,10 @@ export default function SummaryCard({
         <>
           <p className={`text-base font-bold leading-snug ${colorClass}`}>
             {prefix}
-            {formatAmount(Math.abs(value), currency)}
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-1 font-semibold">
-            {currency}
+            {formatAmount(Math.abs(value), currency)}{" "}
+            <span className="text-[10px] text-muted-foreground mt-1 font-semibold">
+              {currency}
+            </span>
           </p>
         </>
       )}
