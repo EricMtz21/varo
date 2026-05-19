@@ -6,20 +6,20 @@ const TABS = [
   {
     id: "movements",
     label: "Movimientos",
-    sub: "Tus ingresos y gastos",
+    sub: "Ingresos y gastos",
     icon: "/assets/coin-w.png",
   },
   {
     id: "savings",
     label: "Cajas de ahorro",
-    sub: "Tus cajas de ahorro",
+    sub: "Rendimientos e intereses",
     icon: "/assets/locker-w.png",
   },
 ];
 
 export default function NavigationTabs({ activeTab, setActiveTab }) {
   return (
-    <div className="px-3 pt-3 pb-1 md:px-0 max-w-2xl mx-auto">
+    <div className="px-3 pt-4 pb-3 md:px-0 max-w-2xl mx-auto">
       <div className="flex gap-3">
         {TABS.map(({ id, label, sub, icon }) => {
           const isActive = activeTab === id;
@@ -27,7 +27,7 @@ export default function NavigationTabs({ activeTab, setActiveTab }) {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex-1 flex flex-col items-start gap-3 p-4 rounded-xl border transition-all relative overflow-hidden pb-16 cursor-pointer text-left select-none active:scale-[0.97] ${
+              className={`flex-1 flex flex-col items-start gap-3 p-4 rounded-md border transition-all relative overflow-hidden pb-16 cursor-pointer text-left select-none active:scale-[0.97] ${
                 isActive
                   ? "bg-card border-border shadow-md"
                   : "bg-transparent border-border/40 hover:bg-muted/30 hover:border-border/70"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircleNotchIcon, TrayIcon } from "@phosphor-icons/react";
+import { TrayIcon } from "@phosphor-icons/react";
 import TransactionItem from "./TransactionItem";
 import { MONTHS } from "@/utils/constants";
 import { formatDateHeader } from "@/utils/format";
@@ -17,18 +17,14 @@ export default function TransactionList({
   const [selectedTxId, setSelectedTxId] = useState(null);
   if (!hydrated) {
     return (
-      <main className="px-4 md:px-0 pb-28 pt-10 max-w-2xl mx-auto flex flex-col items-center justify-center">
-        <CircleNotchIcon
-          size={32}
-          className="text-foreground animate-spin mb-8"
-        />
+      <main className="px-3 md:px-0 pb-28 pt-3 max-w-2xl mx-auto">
         <div className="w-full space-y-3">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex items-center gap-3 bg-card px-4 py-3.5 rounded-xl border border-transparent animate-pulse"
+              className="flex items-center gap-3 bg-card px-4 py-3.5 rounded-md border border-transparent animate-pulse"
             >
-              <div className="w-9 h-9 rounded-xl bg-muted/50 shrink-0" />
+              <div className="w-9 h-9 rounded-md bg-muted/50 shrink-0" />
               <div className="w-full space-y-2 py-1">
                 <div className="h-3.5 bg-muted/50 rounded-md w-1/3" />
                 <div className="h-2.5 bg-muted/50 rounded-md w-1/4" />
@@ -42,12 +38,12 @@ export default function TransactionList({
 
   if (Object.keys(grouped).length === 0) {
     return (
-      <main className="px-4 md:px-0 pb-28 pt-3 max-w-2xl mx-auto">
+      <main className="px-3 md:px-0 pb-28 pt-3 max-w-2xl mx-auto">
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <TrayIcon size={44} />
+          <TrayIcon size={40} />
           <p className="font-semibold mt-4">Sin movimientos</p>
-          <p className="text-sm mt-1">
-            Agrega tu primer movimiento de {MONTHS[currentMonth].toLowerCase()}
+          <p className="text-sm mt-1 text-center">
+            Nada registrado en {MONTHS[currentMonth].toLowerCase()}.
           </p>
         </div>
       </main>
@@ -55,7 +51,7 @@ export default function TransactionList({
   }
 
   return (
-    <main className="px-4 md:px-0 pb-28 pt-3 max-w-2xl mx-auto" onClick={() => setSelectedTxId(null)}>
+    <main className="px-3 md:px-0 pb-28 pt-3 max-w-2xl mx-auto" onClick={() => setSelectedTxId(null)}>
       <div className="space-y-6">
         {Object.entries(grouped).map(([date, txs], groupIdx) => (
           <div
@@ -63,7 +59,7 @@ export default function TransactionList({
             className="animate-fade-up"
             style={{ animationDelay: `${groupIdx * 60}ms` }}
           >
-            <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2 px-1">
+            <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2 px-3">
               {formatDateHeader(date)}
             </p>
             <div className="space-y-2">

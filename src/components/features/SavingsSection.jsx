@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CircleNotchIcon,
   PencilSimpleIcon,
   TrashIcon,
   TrayIcon,
@@ -57,10 +56,10 @@ import { DatePicker } from "@/components/ui/DatePicker";
 // ─── Shared input styles ────────────────────────────────────────────────────
 
 const inputCls =
-  "h-12 w-full rounded-xl border-border bg-muted text-foreground text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-foreground transition-colors px-4";
+  "h-12 w-full rounded-md border-border bg-muted text-foreground text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-foreground transition-colors px-4";
 
 const triggerCls =
-  "h-12 rounded-xl border-border bg-muted text-foreground text-sm px-4 justify-between focus:ring-0 focus-visible:ring-0";
+  "h-12 rounded-md border-border bg-muted text-foreground text-sm px-4 justify-between focus:ring-0 focus-visible:ring-0";
 
 // ─── Add Savings Modal ──────────────────────────────────────────────────────
 
@@ -127,7 +126,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
         onClick={handleClose}
       />
       <div
-        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-xl max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
       >
         <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 sm:hidden" />
         <div className="p-5 sm:p-6">
@@ -135,7 +134,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                className="w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold"
                 style={{ backgroundColor: nextColor + "22", color: nextColor }}
               >
                 {form.name ? form.name.slice(0, 2).toUpperCase() : "??"}
@@ -145,7 +144,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               aria-label="Cerrar"
             >
               <XIcon size={18} />
@@ -204,7 +203,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
             </div>
 
             {/* Limit toggle */}
-            <div className="mt-2 bg-secondary rounded-xl p-3 border border-border">
+            <div className="mt-2 bg-secondary rounded-md p-3 border border-border">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -265,7 +264,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
 
           {/* Live preview */}
           {hasPreview && (
-            <div className="mt-4 bg-secondary rounded-xl p-4 border border-border animate-fade-up">
+            <div className="mt-4 bg-secondary rounded-md p-4 border border-border animate-fade-up">
               <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-3">
                 Ganancias estimadas
               </p>
@@ -293,7 +292,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
             type="button"
             onClick={handleSubmit}
             disabled={!isValid}
-            className="w-full py-4 rounded-xl font-bold text-sm mt-5 bg-foreground text-background transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+            className="w-full py-4 rounded-md font-bold text-sm mt-5 bg-foreground text-background transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
           >
             Agregar caja
           </button>
@@ -366,14 +365,14 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
         onClick={handleClose}
       />
       <div
-        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-xl max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
       >
         <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 sm:hidden" />
         <div className="p-5 sm:p-6">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                className="w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold"
                 style={{ backgroundColor: form.color + "22", color: form.color }}
               >
                 {form.name ? form.name.slice(0, 2).toUpperCase() : "??"}
@@ -383,7 +382,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               aria-label="Cerrar"
             >
               <XIcon size={18} />
@@ -438,7 +437,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
               </span>
             </div>
 
-            <div className="bg-secondary rounded-xl p-3 border border-border">
+            <div className="bg-secondary rounded-md p-3 border border-border">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -505,7 +504,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
                     key={c}
                     type="button"
                     onClick={() => set("color", c)}
-                    className={`w-7 h-7 rounded-lg transition-all cursor-pointer ${form.color === c ? "ring-2 ring-foreground scale-110" : "opacity-60 hover:opacity-100"}`}
+                    className={`w-7 h-7 rounded-md transition-all cursor-pointer ${form.color === c ? "ring-2 ring-foreground scale-110" : "opacity-60 hover:opacity-100"}`}
                     style={{ backgroundColor: c }}
                     aria-label={`Color ${c}`}
                   />
@@ -515,7 +514,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
           </div>
 
           {hasPreview && (
-            <div className="mt-4 bg-secondary rounded-xl p-4 border border-border animate-fade-up">
+            <div className="mt-4 bg-secondary rounded-md p-4 border border-border animate-fade-up">
               <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-3">
                 Ganancias estimadas
               </p>
@@ -542,7 +541,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
             type="button"
             onClick={handleSubmit}
             disabled={!isValid}
-            className="w-full py-4 rounded-xl font-bold text-sm mt-5 bg-foreground text-background transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+            className="w-full py-4 rounded-md font-bold text-sm mt-5 bg-foreground text-background transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
           >
             Guardar cambios
           </button>
@@ -554,7 +553,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
                 onDelete(box.id);
                 handleClose();
               }}
-              className="w-full py-4 rounded-xl font-bold text-sm mt-3 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all cursor-pointer active:scale-[0.98]"
+              className="w-full py-4 rounded-md font-bold text-sm mt-3 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all cursor-pointer active:scale-[0.98]"
             >
               Eliminar caja
             </button>
@@ -580,7 +579,7 @@ function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
   return (
     <div
       onClick={() => onEdit(box)}
-      className="bg-card rounded-sm p-4 group hover:border-muted-foreground transition-colors cursor-pointer animate-fade-up relative"
+      className="bg-card rounded-xl border border-border p-5 shadow-sm group hover:border-muted-foreground transition-colors cursor-pointer animate-fade-up relative active:scale-[0.99]"
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="absolute top-4 right-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
@@ -590,7 +589,7 @@ function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0"
+            className="w-10 h-10 rounded-md flex items-center justify-center font-bold text-sm shrink-0"
             style={{ backgroundColor: box.color + "22", color: box.color }}
           >
             {box.name.slice(0, 2).toUpperCase()}
@@ -604,7 +603,7 @@ function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
         </div>
         <div className="flex items-center gap-2 shrink-0 z-10">
           <span
-            className="text-[11px] font-bold px-2.5 py-1 flex items-center justify-center text-center rounded-lg leading-tight"
+            className="text-[11px] font-bold px-2.5 py-1 flex items-center justify-center text-center rounded-md leading-tight"
             title={
               box.limitAmount
                 ? `Base: ${box.rate}%, Excedente: ${box.secondaryRate || 0}%`
@@ -629,7 +628,7 @@ function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         <div className="bg-secondary rounded-md p-3 border border-border">
           <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wide mb-1">
             Hoy
@@ -671,7 +670,7 @@ function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
           aria-label="Incluir en balance general"
         >
           <span
-            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${included ? "left-4.5" : "left-0.5"}`}
+            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-200 ${included ? "left-4.5" : "left-0.5"}`}
           />
         </button>
       </div>
@@ -727,7 +726,7 @@ export default function SavingsSection({
       {boxes.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div
-            className="p-2 animate-fade-up"
+            className="bg-card rounded-xl shadow-xs border border-border p-4 animate-fade-up"
             style={{ animationDelay: "0ms" }}
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">
@@ -741,7 +740,7 @@ export default function SavingsSection({
             )}
           </div>
           <div
-            className="p-2 animate-fade-up"
+            className="bg-card rounded-xl shadow-xs border border-border p-4 animate-fade-up"
             style={{ animationDelay: "70ms" }}
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">
@@ -759,36 +758,30 @@ export default function SavingsSection({
 
       {/* Box list */}
       {!hydrated ? (
-        <div className="flex flex-col items-center justify-center py-10">
-          <CircleNotchIcon
-            size={32}
-            className="text-foreground animate-spin mb-8"
-          />
-          <div className="w-full space-y-4">
-            {[1, 2].map((i) => (
-              <div
-                key={i}
-                className="bg-card rounded-md p-4 animate-pulse"
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-md bg-muted/50 shrink-0" />
-                  <div className="space-y-2 w-1/3 py-1">
-                    <div className="h-4 bg-muted/50 rounded-md w-full" />
-                    <div className="h-2.5 bg-muted/50 rounded-md w-2/3" />
-                  </div>
-                </div>
-                <div className="space-y-2 mb-4">
-                  <div className="h-3 bg-muted/50 rounded-md w-20" />
-                  <div className="h-6 bg-muted/50 rounded-md w-1/3" />
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="h-14 bg-muted/50 rounded-md" />
-                  <div className="h-14 bg-muted/50 rounded-md" />
-                  <div className="h-14 bg-muted/50 rounded-md" />
+        <div className="w-full space-y-4">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="bg-card rounded-md border border-border p-4 animate-pulse"
+            >
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-md bg-muted/50 shrink-0" />
+                <div className="space-y-2 w-1/3 py-1">
+                  <div className="h-4 bg-muted/50 rounded-md w-full" />
+                  <div className="h-2.5 bg-muted/50 rounded-md w-2/3" />
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="space-y-2 mb-4">
+                <div className="h-3 bg-muted/50 rounded-md w-20" />
+                <div className="h-6 bg-muted/50 rounded-md w-1/3" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="h-14 bg-muted/50 rounded-md" />
+                <div className="h-14 bg-muted/50 rounded-md" />
+                <div className="h-14 bg-muted/50 rounded-md" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : boxes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">

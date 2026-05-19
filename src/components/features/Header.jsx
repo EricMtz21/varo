@@ -52,14 +52,14 @@ export default function Header({
 
   return (
     <>
-      <header className="sticky top-0 z-20 px-3 py-3 bg-background">
+      <header className="sticky top-0 z-20 px-3 py-3 bg-background border-b border-border">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <LogoWords className="h-auto w-18 text-foreground" />
 
           <div className="flex items-center gap-2">
             <button
               onClick={onAddClick}
-              className="hidden sm:flex items-center gap-1.5 bg-foreground hover:bg-foreground/90 text-background text-sm px-3 py-2 rounded-xl transition-colors cursor-pointer active:scale-95"
+              className="hidden sm:flex items-center gap-1.5 bg-foreground hover:bg-foreground/90 text-background text-sm px-3 py-2 rounded-md transition-colors cursor-pointer active:scale-95"
               aria-label="Agregar"
             >
               <PlusIcon size={18} />
@@ -116,7 +116,7 @@ export default function Header({
               </div>
               <button
                 onClick={closeMenu}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0"
+                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0"
               >
                 <XIcon size={16} />
               </button>
@@ -126,7 +126,7 @@ export default function Header({
             <div className="flex-1 p-3">
               <button
                 onClick={onToggleDark}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer text-sm"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer text-sm"
               >
                 {theme === "dark" ? (
                   <MoonIcon size={16} />
@@ -145,7 +145,7 @@ export default function Header({
             <div className="p-3 border-t border-border">
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center justify-end gap-2.5 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors cursor-pointer text-sm"
+                className="w-full flex items-center justify-end gap-2.5 px-3 py-2.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors cursor-pointer text-sm"
               >
                 <span>Cerrar sesión</span>
                 <SignOutIcon size={16} />

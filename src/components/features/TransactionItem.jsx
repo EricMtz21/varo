@@ -51,7 +51,7 @@ export default function TransactionItem({
       <div
         ref={rowRef}
         onClick={handleRowClick}
-        className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors border cursor-pointer animate-fade-up ${
+        className={`flex items-center gap-3 rounded-md px-3 py-3 transition-colors border cursor-pointer animate-fade-up ${
           isSelected
             ? "bg-muted border-border"
             : "bg-card border-transparent hover:bg-muted hover:border-border"
@@ -59,7 +59,7 @@ export default function TransactionItem({
         style={{ animationDelay: `${delay}ms` }}
       >
         <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
           style={{ backgroundColor: catColor + "1A", color: catColor }}
         >
           <CatIcon size={18} weight="fill" />
@@ -110,14 +110,14 @@ export default function TransactionItem({
               menuPos.above ? "animate-tx-menu-above" : "animate-tx-menu-below"
             }
           >
-            <div className="flex items-center gap-1 bg-secondary border border-border rounded-2xl px-1.5 py-1.5 shadow-lg shadow-black/10">
+            <div className="flex items-center gap-1 bg-secondary border border-border rounded-md px-1.5 py-1.5 shadow-lg shadow-black/10">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelect(null);
                   onEdit(tx);
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-foreground hover:bg-foreground/10 transition-colors cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold text-foreground hover:bg-foreground/10 transition-colors cursor-pointer whitespace-nowrap"
               >
                 <PencilSimpleIcon size={14} />
                 Editar
@@ -129,7 +129,7 @@ export default function TransactionItem({
                   onSelect(null);
                   onDelete(tx);
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-destructive hover:bg-destructive/10 transition-colors cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold text-destructive hover:bg-destructive/10 transition-colors cursor-pointer whitespace-nowrap"
               >
                 <TrashIcon size={14} />
                 Borrar

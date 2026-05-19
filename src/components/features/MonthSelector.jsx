@@ -30,16 +30,15 @@ export default function MonthSelector({
   }, [currentMonth]);
 
   return (
-    <section className="px-4 md:px-0 pt-5 pb-2 max-w-2xl mx-auto">
+    <section className="px-3 md:px-0 pt-5 pb-4 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-bold text-foreground">
-          {MONTHS[currentMonth]}{" "}
-          <span className="text-muted-foreground font-medium">{currentYear}</span>
+          {MONTHS[currentMonth]}
         </h2>
         <div className="flex items-center gap-0.5">
           <button
             onClick={() => setCurrentYear((y) => y - 1)}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
             aria-label="Año anterior"
           >
             <CaretLeftIcon size={14} />
@@ -49,7 +48,7 @@ export default function MonthSelector({
           </span>
           <button
             onClick={() => setCurrentYear((y) => y + 1)}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
             aria-label="Año siguiente"
           >
             <CaretRightIcon size={14} />

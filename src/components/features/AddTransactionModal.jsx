@@ -99,10 +99,10 @@ const XIcon = () => (
 // ─── Shared field style helpers ─────────────────────────────────────────────
 
 const inputCls =
-  "h-12 rounded-xl border-border bg-muted text-foreground text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-foreground transition-colors px-4";
+  "h-12 rounded-md border-border bg-muted text-foreground text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-foreground transition-colors px-4";
 
 const triggerCls =
-  "h-12 rounded-xl border-border bg-muted text-foreground text-sm w-full px-4 justify-between focus:ring-0 focus-visible:ring-0 focus:border-foreground";
+  "h-12 rounded-md border-border bg-muted text-foreground text-sm w-full px-4 justify-between focus:ring-0 focus-visible:ring-0 focus:border-foreground";
 
 function PillGroup({ options, value, onChange, activeClass }) {
   return (
@@ -112,7 +112,7 @@ function PillGroup({ options, value, onChange, activeClass }) {
           key={key}
           type="button"
           onClick={() => onChange(key)}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer border ${
+          className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer border ${
             value === key
               ? activeClass
               : "bg-secondary text-muted-foreground border-border hover:text-foreground hover:border-muted-foreground/40"
@@ -246,7 +246,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
 
       {/* Sheet */}
       <div
-        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-2xl max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
       >
         {/* Mobile drag handle */}
         <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 sm:hidden" />
@@ -260,7 +260,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               aria-label="Cerrar"
             >
               <XIcon />
@@ -268,11 +268,11 @@ export default function AddTransactionModal({ onAdd, onClose }) {
           </div>
 
           {/* Type toggle */}
-          <div className="flex bg-secondary rounded-xl p-1 mb-5 border border-border">
+          <div className="flex bg-secondary rounded-md p-1 mb-5 border border-border">
             <button
               type="button"
               onClick={() => handleTypeChange("expense")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+              className={`flex-1 py-2.5 rounded-md text-sm font-bold transition-all cursor-pointer ${
                 form.type === "expense"
                   ? "bg-[#F43F5E] text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -283,7 +283,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
             <button
               type="button"
               onClick={() => handleTypeChange("income")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+              className={`flex-1 py-2.5 rounded-md text-sm font-bold transition-all cursor-pointer ${
                 form.type === "income"
                   ? "bg-[#10B981] text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -319,7 +319,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
                       key={cat}
                       type="button"
                       onClick={() => setField("category", cat)}
-                      className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer border ${
+                      className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-md text-[10px] font-bold transition-all cursor-pointer border ${
                         selected
                           ? "border-transparent"
                           : "bg-secondary text-muted-foreground border-border hover:text-foreground hover:bg-muted"
@@ -406,7 +406,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
                 }`}
               >
                 <div
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-transform ${
                     form.recurring.enabled ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
@@ -479,7 +479,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
             type="button"
             onClick={handleSubmit}
             disabled={!isValid}
-            className="w-full py-4 rounded-xl font-bold text-sm mt-6 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+            className="w-full py-4 rounded-md font-bold text-sm mt-6 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
             style={{ backgroundColor: accentBg, color: "#ffffff" }}
           >
             {form.recurring.enabled
