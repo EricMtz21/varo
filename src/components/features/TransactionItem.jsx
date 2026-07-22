@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import gsap from "gsap";
 import { PencilSimpleIcon, RepeatIcon, TrashIcon } from "@phosphor-icons/react";
+import { EASE, prefersReducedMotion } from "@/lib/motion";
 import {
   CATEGORY_COLORS,
   CATEGORY_ICONS,
@@ -24,7 +26,19 @@ export default function TransactionItem({
   const CatIcon = CATEGORY_ICONS[tx.category] ?? DEFAULT_ICON;
 
   const rowRef = useRef(null);
+  const menuRef = useRef(null);
   const [menuPos, setMenuPos] = useState(null);
+
+  useEffect(() => {
+    if (!rowRef.current || prefersReducedMotion()) return;
+    const tween = gsap.fromTo(
+      rowRef.current,
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.5, ease: EASE, delay: delay / 1000 },
+    );
+    return () => tween.kill();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isSelected && rowRef.current) {
@@ -41,6 +55,23 @@ export default function TransactionItem({
     }
   }, [isSelected]);
 
+  useLayoutEffect(() => {
+    const el = menuRef.current;
+    if (!menuPos || !el) return;
+
+    if (prefersReducedMotion()) {
+      gsap.set(el, { xPercent: -50, opacity: 1, scale: 1, y: 0 });
+      return;
+    }
+
+    const fromY = menuPos.above ? 8 : -8;
+    gsap.fromTo(
+      el,
+      { xPercent: -50, opacity: 0, scale: 0.92, y: fromY },
+      { xPercent: -50, opacity: 1, scale: 1, y: 0, duration: 0.22, ease: EASE },
+    );
+  }, [menuPos]);
+
   function handleRowClick(e) {
     e.stopPropagation();
     onSelect(isSelected ? null : tx.id);
@@ -51,12 +82,11 @@ export default function TransactionItem({
       <div
         ref={rowRef}
         onClick={handleRowClick}
-        className={`flex items-center gap-3 rounded-md px-3 py-3 transition-colors border cursor-pointer animate-fade-up ${
+        className={`flex items-center gap-3 rounded-md px-3 py-3 transition-colors border cursor-pointer ${
           isSelected
             ? "bg-muted border-border"
             : "bg-card border-transparent hover:bg-muted hover:border-border"
         }`}
-        style={{ animationDelay: `${delay}ms` }}
       >
         <div
           className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
@@ -99,6 +129,7 @@ export default function TransactionItem({
         typeof document !== "undefined" &&
         createPortal(
           <div
+            ref={menuRef}
             style={{
               position: "fixed",
               left: menuPos.x,
@@ -106,9 +137,6 @@ export default function TransactionItem({
               bottom: menuPos.bottom,
               zIndex: 200,
             }}
-            className={
-              menuPos.above ? "animate-tx-menu-above" : "animate-tx-menu-below"
-            }
           >
             <div className="flex items-center gap-1 bg-secondary border border-border rounded-md px-1.5 py-1.5 shadow-lg shadow-black/10">
               <button

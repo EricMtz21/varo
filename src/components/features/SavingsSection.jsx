@@ -52,6 +52,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { useModalMotion } from "@/hooks/useModalMotion";
+import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 
 // ─── Shared input styles ────────────────────────────────────────────────────
 
@@ -64,7 +66,9 @@ const triggerCls =
 // ─── Add Savings Modal ──────────────────────────────────────────────────────
 
 function AddSavingsModal({ onAdd, onClose, nextColor }) {
-  const [isExiting, setIsExiting] = useState(false);
+  const { backdropRef, panelRef, requestClose } = useModalMotion("sheet");
+  const limitRevealRef = useRevealOnMount();
+  const previewRevealRef = useRevealOnMount();
   const d = new Date();
   const today = [
     d.getFullYear(),
@@ -89,8 +93,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
   }, []);
 
   function handleClose() {
-    setIsExiting(true);
-    setTimeout(onClose, 260);
+    requestClose(onClose);
   }
 
   function set(key, value) {
@@ -122,11 +125,13 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div
-        className={`absolute inset-0 bg-black/75 backdrop-blur-sm ${isExiting ? "animate-fade-out" : "animate-fade-in"}`}
+        ref={backdropRef}
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
         onClick={handleClose}
       />
       <div
-        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+        ref={panelRef}
+        className="relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin"
       >
         <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 sm:hidden" />
         <div className="p-5 sm:p-6">
@@ -217,7 +222,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
               </label>
 
               {form.hasLimit && (
-                <div className="mt-3 grid grid-cols-2 gap-2 animate-fade-up">
+                <div ref={limitRevealRef} className="mt-3 grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest block mb-1">
                       Tope base ($)
@@ -264,7 +269,7 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
 
           {/* Live preview */}
           {hasPreview && (
-            <div className="mt-4 bg-secondary rounded-md p-4 border border-border animate-fade-up">
+            <div ref={previewRevealRef} className="mt-4 bg-secondary rounded-md p-4 border border-border">
               <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-3">
                 Ganancias estimadas
               </p>
@@ -305,7 +310,9 @@ function AddSavingsModal({ onAdd, onClose, nextColor }) {
 // ─── Edit Savings Modal ─────────────────────────────────────────────────────
 
 function EditSavingsModal({ box, onSave, onClose, onDelete }) {
-  const [isExiting, setIsExiting] = useState(false);
+  const { backdropRef, panelRef, requestClose } = useModalMotion("sheet");
+  const limitRevealRef = useRevealOnMount();
+  const previewRevealRef = useRevealOnMount();
   const d = new Date();
   const today = [
     d.getFullYear(),
@@ -331,8 +338,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
   }, []);
 
   function handleClose() {
-    setIsExiting(true);
-    setTimeout(onClose, 260);
+    requestClose(onClose);
   }
 
   function set(key, value) {
@@ -361,11 +367,13 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div
-        className={`absolute inset-0 bg-black/75 backdrop-blur-sm ${isExiting ? "animate-fade-out" : "animate-fade-in"}`}
+        ref={backdropRef}
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
         onClick={handleClose}
       />
       <div
-        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+        ref={panelRef}
+        className="relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin"
       >
         <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 sm:hidden" />
         <div className="p-5 sm:p-6">
@@ -451,7 +459,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
               </label>
 
               {form.hasLimit && (
-                <div className="mt-3 grid grid-cols-2 gap-2 animate-fade-up">
+                <div ref={limitRevealRef} className="mt-3 grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest block mb-1">
                       Tope base ($)
@@ -514,7 +522,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
           </div>
 
           {hasPreview && (
-            <div className="mt-4 bg-secondary rounded-md p-4 border border-border animate-fade-up">
+            <div ref={previewRevealRef} className="mt-4 bg-secondary rounded-md p-4 border border-border">
               <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-3">
                 Ganancias estimadas
               </p>
@@ -567,6 +575,7 @@ function EditSavingsModal({ box, onSave, onClose, onDelete }) {
 // ─── Savings box card ───────────────────────────────────────────────────────
 
 function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
+  const revealRef = useRevealOnMount(delay);
   const { currentBalance, totalEarned, todayEarnings } = calcStats(box);
 
   const effectiveRate =
@@ -578,9 +587,9 @@ function SavingsBox({ box, onDelete, onEdit, onToggleBalance, delay = 0 }) {
 
   return (
     <div
+      ref={revealRef}
       onClick={() => onEdit(box)}
-      className="bg-card rounded-xl border border-border p-5 shadow-sm group hover:border-muted-foreground transition-colors cursor-pointer animate-fade-up relative active:scale-[0.99]"
-      style={{ animationDelay: `${delay}ms` }}
+      className="bg-card rounded-xl border border-border p-5 shadow-sm group hover:border-muted-foreground transition-colors cursor-pointer relative active:scale-[0.99]"
     >
       <div className="absolute top-4 right-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
         <PencilSimpleIcon size={16} />
@@ -691,6 +700,9 @@ export default function SavingsSection({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const summaryRevealRef1 = useRevealOnMount(0);
+  const summaryRevealRef2 = useRevealOnMount(70);
+  const disclaimerRevealRef = useRevealOnMount(boxes.length * 80);
 
   const prevTriggerRef = useRef(triggerAdd);
   useEffect(() => {
@@ -726,8 +738,8 @@ export default function SavingsSection({
       {boxes.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div
-            className="bg-card rounded-xl shadow-xs border border-border p-4 animate-fade-up"
-            style={{ animationDelay: "0ms" }}
+            ref={summaryRevealRef1}
+            className="bg-card rounded-xl shadow-xs border border-border p-4"
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">
               Total en cajas
@@ -740,8 +752,8 @@ export default function SavingsSection({
             )}
           </div>
           <div
-            className="bg-card rounded-xl shadow-xs border border-border p-4 animate-fade-up"
-            style={{ animationDelay: "70ms" }}
+            ref={summaryRevealRef2}
+            className="bg-card rounded-xl shadow-xs border border-border p-4"
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">
               Total ganado
@@ -810,10 +822,7 @@ export default function SavingsSection({
 
       {/* Disclaimer de impuestos */}
       {hydrated && boxes.length > 0 && (
-        <div
-          className="mt-8 text-center animate-fade-up"
-          style={{ animationDelay: `${boxes.length * 80}ms` }}
-        >
+        <div ref={disclaimerRevealRef} className="mt-8 text-center">
           <p className="text-[10px] text-muted-foreground px-6 font-medium leading-relaxed">
             * Los rendimientos calculados son estimaciones matemáticas brutas
             aproximadas antes de impuestos y retenciones (ISR). Tu pago bancario

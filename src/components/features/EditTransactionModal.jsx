@@ -28,6 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { useModalMotion } from "@/hooks/useModalMotion";
+import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 
 const inputCls = "h-12 rounded-md border-border bg-muted text-foreground text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-foreground transition-colors px-4";
 const triggerCls = "h-12 rounded-md border-border bg-muted text-foreground text-sm px-4 justify-between focus:ring-0 focus-visible:ring-0";
@@ -49,7 +51,8 @@ export default function EditTransactionModal({ tx, onSave, onClose }) {
   const isRecurring = tx.is_recurring;
 
   const [scope, setScope] = useState(isRecurring ? "one" : "single");
-  const [isExiting, setIsExiting] = useState(false);
+  const { backdropRef, panelRef, requestClose } = useModalMotion("sheet");
+  const recurringRef = useRevealOnMount();
 
   const [form, setForm] = useState({
     type: tx.type,
@@ -73,8 +76,7 @@ export default function EditTransactionModal({ tx, onSave, onClose }) {
   }, []);
 
   function handleClose() {
-    setIsExiting(true);
-    setTimeout(onClose, 260);
+    requestClose(onClose);
   }
 
   function handleScopeChange(newScope) {
@@ -145,14 +147,16 @@ export default function EditTransactionModal({ tx, onSave, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div
-        className={`absolute inset-0 bg-black/75 backdrop-blur-sm ${isExiting ? "animate-fade-out" : "animate-fade-in"}`}
+        ref={backdropRef}
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
         onClick={handleClose}
       />
       <div
-        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+        ref={panelRef}
+        className="relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin"
       >
         <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 sm:hidden" />
-        <div className="p-5 sm:p-6">
+        <div className="p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-lg text-foreground">Editar movimiento</h2>
@@ -265,7 +269,7 @@ export default function EditTransactionModal({ tx, onSave, onClose }) {
               </button>
 
               {form.recurring.enabled && (
-                <div className="mt-4 space-y-4">
+                <div ref={recurringRef} className="mt-4 space-y-4">
                   <div>
                     <label className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2 block">Frecuencia</label>
                     <PillGroup options={Object.entries(FREQ_LABELS)} value={form.recurring.frequency}

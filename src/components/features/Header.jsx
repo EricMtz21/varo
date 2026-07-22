@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { LogoWords } from "@/components/ui/LogoWords";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useModalMotion } from "@/hooks/useModalMotion";
 
 export default function Header({
   activeTab,
@@ -23,7 +24,10 @@ export default function Header({
 }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
+  const { backdropRef, panelRef, requestClose } = useModalMotion(
+    "drawer",
+    isMenuOpen,
+  );
 
   useEffect(() => {
     if (isMenuOpen) document.body.classList.add("modal-open");
@@ -32,11 +36,7 @@ export default function Header({
   }, [isMenuOpen]);
 
   const closeMenu = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      setIsMenuOpen(false);
-      setIsExiting(false);
-    }, 260);
+    requestClose(() => setIsMenuOpen(false));
   };
 
   const handleSignOut = async () => {
@@ -90,11 +90,13 @@ export default function Header({
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 flex justify-start">
           <div
-            className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${isExiting ? "animate-fade-out" : "animate-fade-in"}`}
+            ref={backdropRef}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={closeMenu}
           />
           <div
-            className={`relative w-[72%] max-w-xs h-dvh bg-background border-r border-border flex flex-col ${isExiting ? "animate-slide-out-left" : "animate-slide-in-left"}`}
+            ref={panelRef}
+            className="relative w-[72%] max-w-xs h-dvh bg-background border-r border-border flex flex-col"
           >
             {/* Perfil */}
             <div className="p-4 border-b border-border flex items-center justify-between gap-3">

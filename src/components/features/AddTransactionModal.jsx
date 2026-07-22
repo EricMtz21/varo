@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { useModalMotion } from "@/hooks/useModalMotion";
+import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 
 const CURRENCIES = ["MXN", "USD", "EUR", "CAD", "GBP"];
 
@@ -151,7 +153,8 @@ export default function AddTransactionModal({ onAdd, onClose }) {
     },
   });
 
-  const [isExiting, setIsExiting] = useState(false);
+  const { backdropRef, panelRef, requestClose } = useModalMotion("sheet");
+  const recurringRef = useRevealOnMount();
 
   useEffect(() => {
     document.body.classList.add("modal-open");
@@ -159,8 +162,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
   }, []);
 
   function handleClose() {
-    setIsExiting(true);
-    setTimeout(onClose, 260);
+    requestClose(onClose);
   }
 
   const categories =
@@ -240,18 +242,20 @@ export default function AddTransactionModal({ onAdd, onClose }) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black/75 backdrop-blur-sm ${isExiting ? "animate-fade-out" : "animate-fade-in"}`}
+        ref={backdropRef}
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
         onClick={handleClose}
       />
 
       {/* Sheet */}
       <div
-        className={`relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin ${isExiting ? "animate-slide-down" : "animate-slide-up"}`}
+        ref={panelRef}
+        className="relative w-full sm:max-w-md bg-card border-t border-border sm:border sm:rounded-md max-h-[92dvh] overflow-y-auto scrollbar-thin"
       >
         {/* Mobile drag handle */}
         <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 sm:hidden" />
 
-        <div className="p-5 sm:p-6">
+        <div className="p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-lg text-foreground">
@@ -414,7 +418,7 @@ export default function AddTransactionModal({ onAdd, onClose }) {
             </button>
 
             {form.recurring.enabled && (
-              <div className="mt-4 space-y-4">
+              <div ref={recurringRef} className="mt-4 space-y-4">
                 {/* Frequency */}
                 <div>
                   <label className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2 block">

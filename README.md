@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<div align="center">
 
-## Getting Started
+# 💰 Varo — Personal Finance Tracker
 
-First, run the development server:
+**Clear finances, smarter decisions.**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Built with Next.js 16, React 19, Supabase and Tailwind CSS v4.
+
+</div>
+
+---
+
+## Overview
+
+Varo is a personal finance web app for tracking income, expenses, recurring transactions, and savings goals. It's built as an installable PWA with a polished, animated UI, light/dark/system theming, and Google sign-in via Supabase.
+
+## ✨ Features
+
+- **Google authentication** — secure sign-in powered by Supabase Auth (OAuth).
+- **Transactions** — add, edit, and delete income/expense entries with categories, custom colors, and icons.
+- **Recurring transactions** — daily/weekly/monthly recurrence with flexible end conditions (date, number of occurrences, or never), plus scoped edits/deletes (*this one*, *this and following*, *all*).
+- **Savings boxes** — dedicated savings goals with initial amount, growth rate, optional limit, and the option to include/exclude them from your total balance.
+- **Monthly overview** — balance, income, and expense summary cards with a month/year selector.
+- **Multi-currency support** with automatic detection of your most-used currency.
+- **Light / Dark / System theme** with automatic OS preference detection.
+- **Installable PWA** with manifest, app icons, and standalone display mode.
+- **Mobile-first UX** — pull-to-refresh gesture, safe-area aware layout, and animated UI (GSAP, OGL/WebGL backgrounds).
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|---|---|
+| Framework | [Next.js 16](https://nextjs.org) (App Router) + [React 19](https://react.dev) |
+| Backend / Auth / DB | [Supabase](https://supabase.com) (`@supabase/ssr`, `@supabase/supabase-js`) |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com) |
+| UI Primitives | [Radix UI](https://www.radix-ui.com), [shadcn](https://ui.shadcn.com) |
+| Icons | [Phosphor Icons](https://phosphoricons.com) |
+| Charts | [Recharts](https://recharts.org) |
+| Animation / Graphics | [GSAP](https://gsap.com), [OGL](https://github.com/oframe/ogl), [Three.js](https://threejs.org) + [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) |
+| Dates | [date-fns](https://date-fns.org), [react-day-picker](https://daypicker.dev) |
+
+> ⚠️ **Note:** This project uses a customized/experimental version of Next.js. Check `node_modules/next/dist/docs/` for framework-specific conventions before making changes to routing, data fetching, or build configuration.
+
+## 📂 Project Structure
+
+```
+src/
+├── app/                  # Next.js App Router (pages, layout, PWA manifest, auth callback)
+├── components/
+│   ├── features/         # App-specific components (FinanceApp, LoginPage, modals, etc.)
+│   └── ui/               # Reusable UI primitives and visual effects (Beams, DarkVeil, buttons...)
+├── hooks/                # Custom React hooks (reveal-on-mount, modal motion)
+├── lib/
+│   ├── supabase/         # Supabase client/server/middleware setup
+│   └── motion.js         # Animation helpers
+└── utils/                # Formatting helpers, constants, category config
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Node.js 18.18+ (recommended: latest LTS)
+- A [Supabase](https://supabase.com) project with **Google OAuth** enabled
 
-## Learn More
+### 1. Install dependencies
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm install
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Configure environment variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create a `.env.local` file in the project root:
 
-## Deploy on Vercel
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Run the development server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+## 📜 Available Scripts
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start the development server |
+| `pnpm build` | Build the app for production |
+| `pnpm start` | Start the production server |
+| `pnpm lint` | Run ESLint |
+
+## 📄 License
+
+This project is private and not licensed for public distribution.

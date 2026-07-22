@@ -3,8 +3,21 @@
 import { useState } from "react";
 import { TrayIcon } from "@phosphor-icons/react";
 import TransactionItem from "./TransactionItem";
+import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 import { MONTHS } from "@/utils/constants";
 import { formatDateHeader } from "@/utils/format";
+
+function DateGroupHeader({ children, delay }) {
+  const ref = useRevealOnMount(delay);
+  return (
+    <p
+      ref={ref}
+      className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2 px-3"
+    >
+      {children}
+    </p>
+  );
+}
 
 export default function TransactionList({
   hydrated,
@@ -54,14 +67,10 @@ export default function TransactionList({
     <main className="px-3 md:px-0 pb-28 pt-3 max-w-2xl mx-auto" onClick={() => setSelectedTxId(null)}>
       <div className="space-y-6">
         {Object.entries(grouped).map(([date, txs], groupIdx) => (
-          <div
-            key={date}
-            className="animate-fade-up"
-            style={{ animationDelay: `${groupIdx * 60}ms` }}
-          >
-            <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2 px-3">
+          <div key={date}>
+            <DateGroupHeader delay={groupIdx * 60}>
               {formatDateHeader(date)}
-            </p>
+            </DateGroupHeader>
             <div className="space-y-2">
               {txs.map((tx, txIdx) => (
                 <TransactionItem

@@ -19,6 +19,7 @@ import {
   calcStats,
 } from "@/utils/format";
 import { createClient } from "@/lib/supabase/client";
+import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 
 function localDateStr(ts) {
   const d = new Date(ts);
@@ -81,6 +82,10 @@ export default function FinanceApp({ initialUser }) {
     localStorage.setItem("activeTab", tab);
     setActiveTab(tab);
   }
+  const balanceRevealRef = useRevealOnMount(0);
+  const incomeRevealRef = useRevealOnMount(70);
+  const expenseRevealRef = useRevealOnMount(140);
+  const savingsBarRevealRef = useRevealOnMount(200);
   const [savingsAddTrigger, setSavingsAddTrigger] = useState(0);
   const [savingsBoxes, setSavingsBoxes] = useState([]);
   const [savingsHydrated, setSavingsHydrated] = useState(false);
@@ -620,8 +625,8 @@ export default function FinanceApp({ initialUser }) {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {/* Balance – full width on mobile */}
               <div
-                className="col-span-2 sm:col-span-1 bg-card rounded-xl p-5 border border-border shadow-xs animate-fade-up relative overflow-hidden"
-                style={{ animationDelay: "0ms" }}
+                ref={balanceRevealRef}
+                className="col-span-2 sm:col-span-1 bg-card rounded-xl p-5 border border-border shadow-xs relative overflow-hidden"
               >
                 <p className="text-[11px] text-muted-foreground mb-2 font-medium tracking-wide uppercase">
                   Ahorro total
@@ -647,10 +652,7 @@ export default function FinanceApp({ initialUser }) {
                   </>
                 )}
               </div>
-              <div
-                className="animate-fade-up h-full"
-                style={{ animationDelay: "70ms" }}
-              >
+              <div ref={incomeRevealRef} className="h-full">
                 <SummaryCard
                   label="Ingresos"
                   value={monthIncome}
@@ -661,10 +663,7 @@ export default function FinanceApp({ initialUser }) {
                   loading={!hydrated}
                 />
               </div>
-              <div
-                className="animate-fade-up h-full"
-                style={{ animationDelay: "140ms" }}
-              >
+              <div ref={expenseRevealRef} className="h-full">
                 <SummaryCard
                   label="Gastos"
                   value={monthExpenses}
@@ -679,8 +678,8 @@ export default function FinanceApp({ initialUser }) {
 
             {(monthIncome > 0 || monthExpenses > 0) && (
               <div
-                className="mt-3 py-2.5 px-3 flex items-center justify-between bg-card rounded-md border border-border animate-fade-up"
-                style={{ animationDelay: "200ms" }}
+                ref={savingsBarRevealRef}
+                className="mt-3 py-2.5 px-3 flex items-center justify-between bg-card rounded-md border border-border"
               >
                 <span className="text-xs text-muted-foreground font-medium">
                   {savings >= 0 ? "Ahorro" : "Déficit"} en{" "}

@@ -5,9 +5,11 @@ import { createClient } from "@/lib/supabase/client";
 import { GoogleLogoIcon } from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { LogoFull } from "@/components/ui/LogoFull";
+import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const buttonRevealRef = useRevealOnMount();
 
   useEffect(() => {
     const update = () =>
@@ -50,7 +52,7 @@ export default function LoginPage() {
         <br /> decisiones inteligentes.
       </p>
 
-      <div className="flex-1 flex items-end p-2 max-w-sm w-full animate-fade-up">
+      <div ref={buttonRevealRef} className="flex-1 flex items-end p-2 max-w-sm w-full">
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
