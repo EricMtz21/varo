@@ -14,53 +14,61 @@ const HOY = new Date(2026, 7, 28); // 28 de agosto de 2026
 describe("getStatementPeriod", () => {
   it("calcula el periodo abierto", () => {
     expect(getStatementPeriod(15, HOY, 0)).toEqual({
-      start: "2026-08-16",
-      end: "2026-09-15",
+      start: "2026-08-15",
+      end: "2026-09-14",
+      cutoff: "2026-09-15",
     });
   });
 
   it("calcula el periodo ya cortado", () => {
     expect(getStatementPeriod(15, HOY, -1)).toEqual({
-      start: "2026-07-16",
-      end: "2026-08-15",
+      start: "2026-07-15",
+      end: "2026-08-14",
+      cutoff: "2026-08-15",
     });
   });
 
-  it("el día de corte pertenece al periodo que cierra", () => {
+  it("el día de corte abre el periodo nuevo", () => {
+    // Hoy es 28 y el corte es el 28: lo de hoy ya cuenta para el corte que viene.
     expect(getStatementPeriod(28, HOY, 0)).toEqual({
-      start: "2026-07-29",
-      end: "2026-08-28",
-    });
-  });
-
-  it("si el corte de este mes ya pasó, el periodo cierra el mes que viene", () => {
-    expect(getStatementPeriod(27, HOY, 0)).toEqual({
       start: "2026-08-28",
       end: "2026-09-27",
+      cutoff: "2026-09-28",
+    });
+  });
+
+  it("si el corte de este mes ya pasó, el periodo corta el mes que viene", () => {
+    expect(getStatementPeriod(27, HOY, 0)).toEqual({
+      start: "2026-08-27",
+      end: "2026-09-26",
+      cutoff: "2026-09-27",
     });
   });
 
   it("un corte 31 cae al último día en los meses cortos", () => {
     expect(getStatementPeriod(31, new Date(2027, 1, 10), 0)).toEqual({
-      start: "2027-02-01",
-      end: "2027-02-28",
+      start: "2027-01-31",
+      end: "2027-02-27",
+      cutoff: "2027-02-28",
     });
     expect(getStatementPeriod(31, new Date(2027, 2, 10), 0)).toEqual({
-      start: "2027-03-01",
-      end: "2027-03-31",
+      start: "2027-02-28",
+      end: "2027-03-30",
+      cutoff: "2027-03-31",
     });
   });
 
   it("cruza el cambio de año sin romperse", () => {
     expect(getStatementPeriod(5, new Date(2027, 0, 3), 0)).toEqual({
-      start: "2026-12-06",
-      end: "2027-01-05",
+      start: "2026-12-05",
+      end: "2027-01-04",
+      cutoff: "2027-01-05",
     });
   });
 });
 
 describe("getPaymentDate", () => {
-  it("busca el día de pago posterior al corte", () => {
+  it("busca el día de pago posterior a la fecha de corte", () => {
     expect(getPaymentDate(5, "2026-09-15")).toBe("2026-10-05");
     expect(getPaymentDate(20, "2026-09-15")).toBe("2026-09-20");
   });
@@ -94,7 +102,7 @@ describe("daysUntil y relativeDayLabel", () => {
 describe("getCardTotals", () => {
   const tarjeta = { id: "c1", cutoffDay: 15, paymentDay: 5 };
 
-  // Periodo abierto: 16 ago – 15 sep. Periodo cortado: 16 jul – 15 ago.
+  // Periodo abierto: 15 ago – 14 sep. Periodo cortado: 15 jul – 14 ago.
   const movimientos = [
     // Gasto suelto dentro del periodo abierto.
     { id: "t1", credit_card_id: "c1", type: "expense", amount: 1000, date: "2026-08-20" },
@@ -156,6 +164,17 @@ describe("getCardTotals", () => {
 
   it("expone la fecha límite de pago del corte anterior", () => {
     expect(totales.previousPaymentDate).toBe("2026-09-05");
+  });
+
+  it("un gasto del día de corte cuenta para el periodo abierto", () => {
+    const enElCorte = [
+      { id: "x", credit_card_id: "c1", type: "expense", amount: 400, date: "2026-08-15" },
+    ];
+    const t = getCardTotals(tarjeta, enElCorte, HOY);
+    expect(t.current).toBe(400);
+    expect(t.previous).toBe(0);
+    // Y por lo tanto todavía no se debe: no ha entrado a ningún corte.
+    expect(t.outstanding).toBe(0);
   });
 
   it("una tarjeta sin movimientos queda en ceros", () => {

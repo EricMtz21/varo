@@ -13,29 +13,35 @@ export const DAYS_OF_MONTH = Array.from({ length: 31 }, (_, i) => i + 1);
  * Periodo de corte de una tarjeta.
  * offset 0 = periodo abierto (el que se está acumulando ahora),
  * offset -1 = periodo ya cortado (el que toca pagar).
- * El día de corte pertenece al periodo que cierra.
+ * El día de corte abre el periodo nuevo: lo que se gasta ese día ya cuenta
+ * para el siguiente corte. Con corte 18, el periodo va del 18 al 17.
+ * `cutoff` es el día en que este periodo corta, o sea el arranque del que sigue.
  */
 export function getStatementPeriod(cutoffDay, ref = new Date(), offset = 0) {
   const today = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate());
-  let endMonth = today.getMonth();
-  if (today > clampedDate(today.getFullYear(), endMonth, cutoffDay)) endMonth += 1;
-  endMonth += offset;
+  let startMonth = today.getMonth();
+  if (today < clampedDate(today.getFullYear(), startMonth, cutoffDay)) startMonth -= 1;
+  startMonth += offset;
 
-  const end = clampedDate(today.getFullYear(), endMonth, cutoffDay);
-  const previousEnd = clampedDate(today.getFullYear(), endMonth - 1, cutoffDay);
-  const start = new Date(previousEnd);
-  start.setDate(start.getDate() + 1);
+  const start = clampedDate(today.getFullYear(), startMonth, cutoffDay);
+  const cutoff = clampedDate(today.getFullYear(), startMonth + 1, cutoffDay);
+  const end = new Date(cutoff);
+  end.setDate(end.getDate() - 1);
 
-  return { start: toLocalIso(start), end: toLocalIso(end) };
+  return {
+    start: toLocalIso(start),
+    end: toLocalIso(end),
+    cutoff: toLocalIso(cutoff),
+  };
 }
 
-// Primera fecha de pago posterior al corte dado.
-export function getPaymentDate(paymentDay, periodEndIso) {
+// Primera fecha de pago posterior a la fecha de corte dada.
+export function getPaymentDate(paymentDay, cutoffIso) {
   if (!paymentDay) return null;
-  const end = isoToDate(periodEndIso);
-  let payment = clampedDate(end.getFullYear(), end.getMonth(), paymentDay);
-  if (payment <= end) {
-    payment = clampedDate(end.getFullYear(), end.getMonth() + 1, paymentDay);
+  const cutoff = isoToDate(cutoffIso);
+  let payment = clampedDate(cutoff.getFullYear(), cutoff.getMonth(), paymentDay);
+  if (payment <= cutoff) {
+    payment = clampedDate(cutoff.getFullYear(), cutoff.getMonth() + 1, paymentDay);
   }
   return toLocalIso(payment);
 }
@@ -121,8 +127,8 @@ export function getCardTotals(
     currentCount: countRange(period.start, period.end),
     paid,
     outstanding: chargedUpToLastCutoff - paid,
-    paymentDate: getPaymentDate(card.paymentDay, period.end),
-    previousPaymentDate: getPaymentDate(card.paymentDay, previousPeriod.end),
+    paymentDate: getPaymentDate(card.paymentDay, period.cutoff),
+    previousPaymentDate: getPaymentDate(card.paymentDay, previousPeriod.cutoff),
   };
 }
 

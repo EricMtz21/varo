@@ -149,7 +149,7 @@ export default function CreditCardRow({
         <p className="text-xs text-muted-foreground mt-1">
           {formatShortDate(totals.period.start)} –{" "}
           {formatShortDate(totals.period.end)} ·{" "}
-          {relativeDayLabel(totals.period.end, {
+          {relativeDayLabel(totals.period.cutoff, {
             present: "corta",
             future: "corta",
             past: "cortó",

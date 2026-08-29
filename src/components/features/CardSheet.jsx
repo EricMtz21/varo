@@ -61,7 +61,7 @@ export default function CardSheet({
   const period = getStatementPeriod(Number(form.cutoffDay));
   const paymentIso = getPaymentDate(
     form.paymentDay ? Number(form.paymentDay) : null,
-    period.end,
+    period.cutoff,
   );
 
   return (
@@ -172,7 +172,7 @@ export default function CardSheet({
             {formatShortDate(period.start)} – {formatShortDate(period.end)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {relativeDayLabel(period.end, {
+            {relativeDayLabel(period.cutoff, {
               present: "Corta",
               future: "Corta",
               past: "Cortó",
