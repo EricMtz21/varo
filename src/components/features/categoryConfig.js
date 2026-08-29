@@ -42,11 +42,8 @@ export const EXPENSE_CATEGORIES = [
   "Entretenimiento",
   "Salud",
   "Educación",
-  "Ropa",
   "Servicios",
   "Seguro",
-  "Vivienda",
-  "Tecnología",
   "Viajes",
   "Suscripciones",
   "Mascotas",
@@ -70,16 +67,17 @@ export const CATEGORY_COLORS = {
   Entretenimiento: "#C084FC",
   Salud:         "#34D399",
   Educación:     "#67E8F9",
-  Ropa:          "#F472B6",
   Servicios:     "#94A3B8",
   Seguro:        "#38BDF8",
-  Vivienda:      "#FBBF24",
-  Tecnología:    "#818CF8",
   Viajes:        "#2DD4BF",
   Suscripciones: "#A78BFA",
   Mascotas:      "#F59E0B",
   Regalos:       "#E879F9",
   Otro:          "#64748B",
+  // Retiradas del selector; se conservan para registros ya guardados
+  Ropa:          "#F472B6",
+  Vivienda:      "#FBBF24",
+  Tecnología:    "#818CF8",
 };
 
 export const CATEGORY_ICONS = {
@@ -98,16 +96,17 @@ export const CATEGORY_ICONS = {
   Entretenimiento: GameControllerIcon,
   Salud:         FirstAidKitIcon,
   Educación:     GraduationCapIcon,
-  Ropa:          TShirtIcon,
   Servicios:     WrenchIcon,
   Seguro:        ShieldIcon,
-  Vivienda:      HouseIcon,
-  Tecnología:    MonitorIcon,
   Viajes:        AirplaneIcon,
   Suscripciones: ArrowsCounterClockwiseIcon,
   Mascotas:      PawPrintIcon,
   Regalos:       GiftIcon,
   Otro:          DotsThreeIcon,
+  // Retiradas del selector; se conservan para registros ya guardados
+  Ropa:          TShirtIcon,
+  Vivienda:      HouseIcon,
+  Tecnología:    MonitorIcon,
 };
 
 export const DEFAULT_ICON = QuestionIcon;
