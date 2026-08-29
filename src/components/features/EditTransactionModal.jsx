@@ -32,7 +32,7 @@ import { useModalMotion } from "@/hooks/useModalMotion";
 import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 
 const inputCls = "h-12 rounded-md border-border bg-muted text-foreground text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-foreground transition-colors px-4";
-const triggerCls = "h-12 rounded-md border-border bg-muted text-foreground text-sm px-4 justify-between focus:ring-0 focus-visible:ring-0";
+const triggerCls = "h-12 data-[size=default]:h-12 rounded-md border-border bg-muted text-foreground text-sm px-4 justify-between focus:ring-0 focus-visible:ring-0";
 
 function PillGroup({ options, value, onChange, activeClass }) {
   return (
@@ -204,6 +204,20 @@ export default function EditTransactionModal({ tx, onSave, onClose }) {
               value={form.name} onChange={(e) => setField("name", e.target.value)}
               className={inputCls} maxLength={60} />
 
+            <div className="flex gap-2">
+              <Input type="number" placeholder="0.00" min="0.01" step="0.01"
+                value={form.amount} onChange={(e) => setField("amount", e.target.value)}
+                className={`${inputCls} flex-1`} />
+              <Select value={form.currency} onValueChange={(v) => setField("currency", v)}>
+                <SelectTrigger className={`${triggerCls} w-22.5 shrink-0`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper" className="z-200">
+                  {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2">Categoría</p>
               <div className="grid grid-cols-3 gap-1.5">
@@ -221,20 +235,6 @@ export default function EditTransactionModal({ tx, onSave, onClose }) {
                   );
                 })}
               </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Input type="number" placeholder="0.00" min="0.01" step="0.01"
-                value={form.amount} onChange={(e) => setField("amount", e.target.value)}
-                className={`${inputCls} flex-1`} />
-              <Select value={form.currency} onValueChange={(v) => setField("currency", v)}>
-                <SelectTrigger className={`${triggerCls} w-22.5 shrink-0`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper" className="z-200">
-                  {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
             </div>
 
             <div>

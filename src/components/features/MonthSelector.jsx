@@ -29,6 +29,16 @@ export default function MonthSelector({
     }
   }, [currentMonth]);
 
+  function goToPreviousYear() {
+    setCurrentYear((y) => y - 1);
+    setCurrentMonth(11);
+  }
+
+  function goToNextYear() {
+    setCurrentYear((y) => y + 1);
+    setCurrentMonth(0);
+  }
+
   return (
     <section className="px-3 md:px-0 pt-5 pb-4 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-3">
@@ -37,7 +47,7 @@ export default function MonthSelector({
         </h2>
         <div className="flex items-center gap-0.5">
           <button
-            onClick={() => setCurrentYear((y) => y - 1)}
+            onClick={goToPreviousYear}
             className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
             aria-label="Año anterior"
           >
@@ -47,7 +57,7 @@ export default function MonthSelector({
             {currentYear}
           </span>
           <button
-            onClick={() => setCurrentYear((y) => y + 1)}
+            onClick={goToNextYear}
             className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
             aria-label="Año siguiente"
           >

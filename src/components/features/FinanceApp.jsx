@@ -709,6 +709,7 @@ export default function FinanceApp({ initialUser }) {
             handleDeleteClick={handleDeleteClick}
             handleEditClick={handleEditClick}
             formatAmount={formatAmount}
+            currency={defaultCurrency}
           />
         </>
       )}

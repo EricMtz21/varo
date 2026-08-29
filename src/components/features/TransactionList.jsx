@@ -7,15 +7,18 @@ import { useRevealOnMount } from "@/hooks/useRevealOnMount";
 import { MONTHS } from "@/utils/constants";
 import { formatDateHeader } from "@/utils/format";
 
-function DateGroupHeader({ children, delay }) {
+function DateGroupHeader({ date, total, delay }) {
   const ref = useRevealOnMount(delay);
   return (
-    <p
+    <div
       ref={ref}
-      className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2 px-3"
+      className="flex items-baseline justify-between gap-3 mb-2 px-3 text-[11px] font-bold uppercase tracking-widest"
     >
-      {children}
-    </p>
+      <span className="text-muted-foreground truncate">
+        {formatDateHeader(date)}
+      </span>
+      {total}
+    </div>
   );
 }
 
@@ -26,6 +29,7 @@ export default function TransactionList({
   handleDeleteClick,
   handleEditClick,
   formatAmount,
+  currency = "MXN",
 }) {
   const [selectedTxId, setSelectedTxId] = useState(null);
   if (!hydrated) {
@@ -66,27 +70,41 @@ export default function TransactionList({
   return (
     <main className="px-3 md:px-0 pb-28 pt-3 max-w-2xl mx-auto" onClick={() => setSelectedTxId(null)}>
       <div className="space-y-6">
-        {Object.entries(grouped).map(([date, txs], groupIdx) => (
-          <div key={date}>
-            <DateGroupHeader delay={groupIdx * 60}>
-              {formatDateHeader(date)}
-            </DateGroupHeader>
-            <div className="space-y-2">
-              {txs.map((tx, txIdx) => (
-                <TransactionItem
-                  key={tx.id}
-                  tx={tx}
-                  onDelete={handleDeleteClick}
-                  onEdit={handleEditClick}
-                  delay={groupIdx * 60 + txIdx * 40}
-                  formatAmount={formatAmount}
-                  isSelected={selectedTxId === tx.id}
-                  onSelect={(id) => setSelectedTxId(id)}
-                />
-              ))}
+        {Object.entries(grouped).map(([date, txs], groupIdx) => {
+          const dayExpenses = txs
+            .filter((t) => t.type === "expense")
+            .reduce((sum, t) => sum + t.amount, 0);
+
+          return (
+            <div key={date}>
+              <DateGroupHeader
+                date={date}
+                delay={groupIdx * 60}
+                total={
+                  dayExpenses > 0 ? (
+                    <span className="text-muted-foreground shrink-0 tabular-nums">
+                      -{formatAmount(dayExpenses, currency)}
+                    </span>
+                  ) : null
+                }
+              />
+              <div className="space-y-2">
+                {txs.map((tx, txIdx) => (
+                  <TransactionItem
+                    key={tx.id}
+                    tx={tx}
+                    onDelete={handleDeleteClick}
+                    onEdit={handleEditClick}
+                    delay={groupIdx * 60 + txIdx * 40}
+                    formatAmount={formatAmount}
+                    isSelected={selectedTxId === tx.id}
+                    onSelect={(id) => setSelectedTxId(id)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </main>
   );

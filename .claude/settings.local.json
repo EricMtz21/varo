@@ -28,7 +28,15 @@
       "Bash(npx playwright *)",
       "Bash(lsof -ti:3000 -sTCP:LISTEN)",
       "Bash(xargs -r kill)",
-      "Bash(pnpm lint *)"
+      "Bash(pnpm lint *)",
+      "Bash(cd \"c:/Users/ericm/OneDrive/Documentos/Projects/micontaduria\" && ls node_modules/next/dist/docs/ 2>/dev/null | head -40; echo \"--- testing ---\"; find node_modules/next/dist/docs -iname \"*test*\" 2>/dev/null | head -20)",
+      "Read(//c/Users/ericm/OneDrive/Documentos/Projects/micontaduria/node_modules/next/dist/**)",
+      "Bash(cd \"c:/Users/ericm/OneDrive/Documentos/Projects/micontaduria\" && ls node_modules/next/ 2>/dev/null && echo \"=== pnpm store path ===\" && ls node_modules/.pnpm 2>/dev/null | grep -i \"^next@\" | head -5)",
+      "Read(//c/Users/ericm/OneDrive/Documentos/Projects/micontaduria/node_modules/**)",
+      "Bash(cd \"c:/Users/ericm/OneDrive/Documentos/Projects/micontaduria\" && ls node_modules | head -20; echo \"=== next? ===\"; ls -d node_modules/next 2>&1)",
+      "PowerShell($p = \\(Resolve-Path \"node_modules\\\\next\"\\).Path; Write-Output \"resolved: $p\"; Get-ChildItem $p | Select-Object Name | Format-Table -AutoSize)",
+      "Bash(ls -la \"C:/Users/ericm/.claude/projects/c--Users-ericm-OneDrive-Documentos-Projects-micontaduria/memory/\" 2>&1)",
+      "Read(//c/Users/ericm/.claude/projects/c--Users-ericm-OneDrive-Documentos-Projects-micontaduria/**)"
     ]
   }
 }
