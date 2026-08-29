@@ -2,42 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { TrayIcon } from "@phosphor-icons/react";
-import SavingsSheet from "./SavingsSheet";
-import SavingsBoxCard from "./SavingsBoxCard";
+import CardSheet from "./CardSheet";
+import CardPaymentSheet from "./CardPaymentSheet";
+import CreditCardRow from "./CreditCardRow";
 import { useRevealOnMount } from "@/hooks/useRevealOnMount";
-import { calcStats, formatAmount, todayIso } from "@/utils/format";
-import { ACCENT_COLORS } from "@/utils/constants";
+import { formatAmount } from "@/utils/format";
+import { CARD_COLORS, getCardTotals } from "@/utils/creditCards";
 
-// Una caja nueva empieza vacía; al editar, la hoja se llena con lo guardado.
-function emptyForm(color) {
-  return {
-    name: "",
-    initialAmount: "",
-    rate: "",
-    hasLimit: false,
-    limitAmount: "",
-    secondaryRate: "",
-    currency: "MXN",
-    startDate: todayIso(),
-    color,
-  };
-}
-
-function formFromBox(box) {
-  return {
-    name: box.name,
-    initialAmount: String(box.initialAmount),
-    rate: String(box.rate),
-    hasLimit: !!box.limitAmount,
-    limitAmount: box.limitAmount ? String(box.limitAmount) : "",
-    secondaryRate: box.secondaryRate ? String(box.secondaryRate) : "",
-    currency: box.currency,
-    startDate: box.startDate,
-    color: box.color,
-  };
-}
-
-function BoxesSkeleton() {
+function CardsSkeleton() {
   return (
     <div className="w-full space-y-4">
       {[1, 2].map((i) => (
@@ -67,20 +39,24 @@ function BoxesSkeleton() {
   );
 }
 
-export default function SavingsSection({
+export default function CreditCardsSection({
   triggerAdd,
-  boxes,
+  cards,
+  transactions,
+  payments = [],
   hydrated,
+  currency = "MXN",
   onAdd,
-  onDelete,
   onEdit,
-  onToggleBalance,
+  onDelete,
+  onRegisterPayment,
+  onDeletePayment,
 }) {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const summaryRevealRef1 = useRevealOnMount(0);
-  const summaryRevealRef2 = useRevealOnMount(70);
-  const disclaimerRevealRef = useRevealOnMount(boxes.length * 80);
+  const [payTarget, setPayTarget] = useState(null);
+  const summaryRef1 = useRevealOnMount(0);
+  const summaryRef2 = useRevealOnMount(70);
 
   // El botón "+" vive en el header y el FAB: avisan subiendo este contador.
   const prevTriggerRef = useRef(triggerAdd);
@@ -101,117 +77,140 @@ export default function SavingsSection({
     return ok;
   }
 
-  const nextColor = ACCENT_COLORS[boxes.length % ACCENT_COLORS.length];
+  async function handlePay(values) {
+    const ok = await onRegisterPayment(values);
+    if (ok) setPayTarget(null);
+    return ok;
+  }
 
-  const mxnBoxes = boxes.filter((b) => b.currency === "MXN");
-  const totalMxn = mxnBoxes.reduce(
-    (sum, b) => sum + calcStats(b).currentBalance,
-    0,
+  const totals = cards.map((card) =>
+    getCardTotals(card, transactions, new Date(), payments),
   );
-  const totalEarnedMxn = mxnBoxes.reduce(
-    (sum, b) => sum + calcStats(b).totalEarned,
-    0,
-  );
+  const totalCurrent = totals.reduce((sum, t) => sum + t.current, 0);
+  const totalOutstanding = totals.reduce((sum, t) => sum + t.outstanding, 0);
+  const nextColor = CARD_COLORS[cards.length % CARD_COLORS.length];
+
+  const payTargetTotals = payTarget
+    ? getCardTotals(payTarget, transactions, new Date(), payments)
+    : null;
 
   return (
     <div className="px-3 md:px-0 md:pt-3 pb-28 max-w-2xl mx-auto mt-2">
       {/* Resumen */}
-      {boxes.length > 0 && (
+      {cards.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div
-            ref={summaryRevealRef1}
+            ref={summaryRef1}
             className="bg-card rounded-xl shadow-xs border border-border p-4"
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">
-              Total en cajas
+              Periodo actual
             </p>
             <p className="text-base font-bold text-foreground">
-              {formatAmount(totalMxn, "MXN")}
+              {formatAmount(totalCurrent, currency)}
             </p>
-            {boxes.length !== mxnBoxes.length && (
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                Solo MXN
-              </p>
-            )}
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              En todas las tarjetas
+            </p>
           </div>
           <div
-            ref={summaryRevealRef2}
+            ref={summaryRef2}
             className="bg-card rounded-xl shadow-xs border border-border p-4"
           >
             <p className="text-[11px] text-muted-foreground mb-1 font-medium tracking-wide uppercase">
-              Total ganado
+              Por pagar
             </p>
-            <p className="text-base font-bold text-[#10B981]">
-              +{formatAmount(totalEarnedMxn, "MXN")}
+            <p
+              className={`text-base font-bold ${totalOutstanding > 0 ? "text-[#F43F5E]" : "text-[#10B981]"}`}
+            >
+              {formatAmount(Math.abs(totalOutstanding), currency)}
             </p>
-            {boxes.length !== mxnBoxes.length && (
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                Solo MXN
-              </p>
-            )}
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              {totalOutstanding > 0 ? "Cortes ya cerrados" : "Al corriente"}
+            </p>
           </div>
         </div>
       )}
 
       {/* Lista */}
       {!hydrated ? (
-        <BoxesSkeleton />
-      ) : boxes.length === 0 ? (
+        <CardsSkeleton />
+      ) : cards.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <TrayIcon size={44} />
-          <p className="font-semibold mt-4">Sin cajas de ahorro</p>
-          <p className="text-sm mt-1">
-            Presiona &quot;+ Caja&quot; para agregar una
+          <p className="font-semibold mt-4">Sin tarjetas</p>
+          <p className="text-sm mt-1 text-center px-8">
+            Agrega una tarjeta y enlaza tus gastos para ver cuánto debes en cada
+            corte.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {boxes.map((box, i) => (
-            <SavingsBoxCard
-              key={box.id}
-              box={box}
-              onDelete={onDelete}
+          {cards.map((card, i) => (
+            <CreditCardRow
+              key={card.id}
+              card={card}
+              transactions={transactions}
+              payments={payments}
+              currency={currency}
               onEdit={setEditTarget}
-              onToggleBalance={onToggleBalance}
+              onPay={setPayTarget}
+              onDeletePayment={onDeletePayment}
               delay={i * 80}
             />
           ))}
         </div>
       )}
 
-      {/* Disclaimer de impuestos */}
-      {hydrated && boxes.length > 0 && (
-        <div ref={disclaimerRevealRef} className="mt-8 text-center">
+      {hydrated && cards.length > 0 && (
+        <div className="mt-8 text-center">
           <p className="text-[10px] text-muted-foreground px-6 font-medium leading-relaxed">
-            * Los rendimientos calculados son estimaciones matemáticas brutas
-            aproximadas antes de impuestos y retenciones (ISR). Tu pago bancario
-            real puede variar.
+            * Los totales suman los gastos que enlazaste a cada tarjeta menos
+            los pagos que registraste. No incluyen intereses ni anualidades.
           </p>
         </div>
       )}
 
       {showAddSheet && (
-        <SavingsSheet
-          title="Nueva caja"
-          submitLabel="Agregar caja"
-          initial={emptyForm(nextColor)}
-          dateLabel="Fecha de inicio"
+        <CardSheet
+          title="Nueva tarjeta"
+          submitLabel="Agregar tarjeta"
+          initial={{
+            name: "",
+            color: nextColor,
+            cutoffDay: "1",
+            paymentDay: "",
+          }}
           onSubmit={handleAdd}
           onClose={() => setShowAddSheet(false)}
         />
       )}
 
       {editTarget && (
-        <SavingsSheet
-          title="Editar caja"
+        <CardSheet
+          title="Editar tarjeta"
           submitLabel="Guardar cambios"
-          initial={formFromBox(editTarget)}
-          dateLabel="Balance a partir de"
-          dateHelp="Desde esta fecha se calculan los rendimientos. Muévela solo si también actualizaste el monto."
-          showColorPicker
+          initial={{
+            name: editTarget.name,
+            color: editTarget.color,
+            cutoffDay: String(editTarget.cutoffDay),
+            paymentDay: editTarget.paymentDay
+              ? String(editTarget.paymentDay)
+              : "",
+          }}
           onSubmit={handleEdit}
           onDelete={() => onDelete(editTarget.id)}
           onClose={() => setEditTarget(null)}
+        />
+      )}
+
+      {payTarget && (
+        <CardPaymentSheet
+          card={payTarget}
+          suggested={Math.max(payTargetTotals?.outstanding ?? 0, 0)}
+          currency={currency}
+          onSubmit={handlePay}
+          onClose={() => setPayTarget(null)}
         />
       )}
     </div>

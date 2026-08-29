@@ -30,6 +30,8 @@ export default function TransactionList({
   handleEditClick,
   formatAmount,
   currency = "MXN",
+  cardsById = {},
+  query = "",
 }) {
   const [selectedTxId, setSelectedTxId] = useState(null);
   if (!hydrated) {
@@ -58,9 +60,13 @@ export default function TransactionList({
       <main className="px-3 md:px-0 pb-28 pt-3 max-w-2xl mx-auto">
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <TrayIcon size={40} />
-          <p className="font-semibold mt-4">Sin movimientos</p>
-          <p className="text-sm mt-1 text-center">
-            Nada registrado en {MONTHS[currentMonth].toLowerCase()}.
+          <p className="font-semibold mt-4">
+            {query.trim() ? "Sin coincidencias" : "Sin movimientos"}
+          </p>
+          <p className="text-sm mt-1 text-center px-8">
+            {query.trim()
+              ? `Nada que coincida con “${query.trim()}” en ${MONTHS[currentMonth].toLowerCase()}.`
+              : `Nada registrado en ${MONTHS[currentMonth].toLowerCase()}.`}
           </p>
         </div>
       </main>
@@ -95,6 +101,7 @@ export default function TransactionList({
                     tx={tx}
                     onDelete={handleDeleteClick}
                     onEdit={handleEditClick}
+                    card={cardsById[tx.credit_card_id] ?? null}
                     delay={groupIdx * 60 + txIdx * 40}
                     formatAmount={formatAmount}
                     isSelected={selectedTxId === tx.id}

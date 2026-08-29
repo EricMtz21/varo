@@ -64,7 +64,11 @@ export default function Header({
             >
               <PlusIcon size={18} />
               <span className="font-bold">
-                {activeTab === "savings" ? "Caja" : "Nuevo"}
+                {activeTab === "savings"
+                  ? "Caja"
+                  : activeTab === "cards"
+                    ? "Tarjeta"
+                    : "Nuevo"}
               </span>
             </button>
             <button

@@ -13,6 +13,37 @@ export function formatAmount(amount, currency = "MXN") {
   }
 }
 
+// ─── Fechas ─────────────────────────────────────────────────────────────────
+
+// Fecha local en ISO (YYYY-MM-DD). Nunca uses toISOString() para esto: convierte
+// a UTC y puede correr el día según la zona horaria.
+export function toLocalIso(date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+
+export function todayIso() {
+  return toLocalIso(new Date());
+}
+
+export function isoToDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+// Fecha del día `day` en (year, month) recortada al último día real del mes:
+// el "31" de febrero es el 28 (o 29). `month` puede desbordarse; Date normaliza.
+export function clampedDate(year, month, day) {
+  const base = new Date(year, month, 1);
+  const y = base.getFullYear();
+  const m = base.getMonth();
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  return new Date(y, m, Math.min(day, lastDay));
+}
+
 export function formatDateHeader(dateStr) {
   const d = new Date(dateStr + "T12:00:00");
   const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -24,59 +55,103 @@ export function formatDateHeader(dateStr) {
   return `${dayNames[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
 }
 
-export function getOccurrencesInMonth(tx, year, month) {
-  if (!tx.is_recurring && !tx.isRecurring) {
-    const d = new Date(tx.date + "T12:00:00");
-    if (d.getFullYear() === year && d.getMonth() === month) return [{ dateStr: tx.date, occurrenceIndex: 1, totalOccurrences: 1 }];
-    return [];
+// ─── Recurrencia ────────────────────────────────────────────────────────────
+
+/**
+ * Fecha de la ocurrencia número `index` (0 = la primera), calculada SIEMPRE
+ * desde la fecha de inicio y no sumando paso a paso.
+ *
+ * Esto es lo que evita el desfase: sumar un mes a "31 de enero" da 3 de marzo,
+ * y a partir de ahí la serie entera se queda en el día 3. Calculando desde el
+ * origen, un cargo del 31 cae 31 ene, 28 feb, 31 mar… y siempre vuelve al 31.
+ */
+export function occurrenceIso(startIso, frequency, index) {
+  const [year, month, day] = startIso.split("-").map(Number);
+  const monthIndex = month - 1;
+
+  if (frequency === "monthly") {
+    return toLocalIso(clampedDate(year, monthIndex + index, day));
+  }
+  if (frequency === "yearly") {
+    return toLocalIso(clampedDate(year + index, monthIndex, day));
   }
 
-  const dates = [];
-  let current = new Date(tx.date + "T12:00:00");
+  const stepDays = { daily: 1, weekly: 7, biweekly: 15 }[frequency];
+  if (!stepDays) return null;
+  return toLocalIso(new Date(year, monthIndex, day + stepDays * index));
+}
+
+/**
+ * Todas las ocurrencias de un movimiento desde su fecha de inicio hasta
+ * `untilIso` inclusive, respetando la condición de fin de la serie.
+ * No filtra las fechas borradas: cada quien decide si las quiere.
+ */
+export function listOccurrences(tx, untilIso) {
+  const isRecurring = tx.is_recurring || tx.isRecurring;
+  if (!isRecurring) {
+    return tx.date <= untilIso
+      ? [{ dateStr: tx.date, occurrenceIndex: 1, totalOccurrences: 1 }]
+      : [];
+  }
+
   const endDateStr = tx.recurring_end_date || tx.recurringEndDate;
   const endType = tx.recurring_end_type || tx.recurringEndType;
   const occrs = tx.recurring_occurrences || tx.recurringOccurrences;
-  const freq = tx.recurring_frequency || tx.recurringFrequency;
+  const frequency = tx.recurring_frequency || tx.recurringFrequency;
 
-  const end = endDateStr && endType === 'date' ? new Date(endDateStr + "T23:59:59") : null;
-  const maxOccurrences = endType === 'occurrences' ? parseInt(occrs) : null;
-  
-  let occurrencesCount = 0;
+  const seriesEnd = endType === "date" && endDateStr ? endDateStr : null;
+  const maxOccurrences = endType === "occurrences" ? parseInt(occrs) : null;
 
-  while (true) {
-    if (end && current > end) break;
-    if (maxOccurrences && occurrencesCount >= maxOccurrences) break;
+  const results = [];
+  // Tope duro: protege de un bucle infinito si la frecuencia llega corrupta.
+  for (let index = 0; index < 5000; index++) {
+    if (maxOccurrences && index >= maxOccurrences) break;
 
-    const currentYear = current.getFullYear();
-    const currentMonth = current.getMonth();
-    
-    // Stop if we bypassed the target view
-    if (currentYear > year || (currentYear === year && currentMonth > month)) {
-      break;
-    }
+    const dateStr = occurrenceIso(tx.date, frequency, index);
+    if (!dateStr) break;
+    if (seriesEnd && dateStr > seriesEnd) break;
+    if (dateStr > untilIso) break;
 
-    if (currentYear === year && currentMonth === month) {
-      dates.push({
-        dateStr: current.toISOString().split("T")[0],
-        occurrenceIndex: occurrencesCount + 1,
-        totalOccurrences: maxOccurrences
-      });
-    }
-
-    occurrencesCount++;
-    const next = new Date(current);
-    if (freq === "daily") next.setDate(next.getDate() + 1);
-    else if (freq === "weekly") next.setDate(next.getDate() + 7);
-    else if (freq === "biweekly") next.setDate(next.getDate() + 15);
-    else if (freq === "monthly") next.setMonth(next.getMonth() + 1);
-    else if (freq === "yearly") next.setFullYear(next.getFullYear() + 1);
-    else break; // Fallback
-
-    current = next;
+    results.push({
+      dateStr,
+      occurrenceIndex: index + 1,
+      totalOccurrences: maxOccurrences,
+    });
   }
-
-  return dates;
+  return results;
 }
+
+function lastDayOfMonthIso(year, month) {
+  return toLocalIso(new Date(year, month + 1, 0));
+}
+
+export function getOccurrencesInMonth(tx, year, month) {
+  const firstDay = toLocalIso(new Date(year, month, 1));
+  return listOccurrences(tx, lastDayOfMonthIso(year, month)).filter(
+    (o) => o.dateStr >= firstDay,
+  );
+}
+
+export function getOccurrencesUpToMonth(tx, year, month) {
+  return listOccurrences(tx, lastDayOfMonthIso(year, month)).map(
+    (o) => o.dateStr,
+  );
+}
+
+/**
+ * Ocurrencias dentro de un rango de fechas arbitrario. A diferencia de
+ * getOccurrencesInMonth, el rango no está atado a un mes calendario: los
+ * periodos de corte de una tarjeta cruzan meses (ej. 16 ago – 15 sep).
+ * Aquí sí se descartan las fechas borradas.
+ */
+export function getOccurrencesInRange(tx, startIso, endIso) {
+  const deleted = tx.deleted_dates ? tx.deleted_dates.split(",") : [];
+  return listOccurrences(tx, endIso)
+    .filter((o) => o.dateStr >= startIso && !deleted.includes(o.dateStr))
+    .map((o) => o.dateStr);
+}
+
+// ─── Cajas de ahorro ────────────────────────────────────────────────────────
 
 export function calcStats(box) {
   const primaryParam = parseFloat(box.rate) / 100;
@@ -117,51 +192,4 @@ export function calcStats(box) {
 
   const totalEarned = currentBalance - box.initialAmount;
   return { currentBalance, totalEarned, todayEarnings };
-}
-
-export function getOccurrencesUpToMonth(tx, year, month) {
-  if (!tx.is_recurring && !tx.isRecurring) {
-    const d = new Date(tx.date + "T12:00:00");
-    if (d.getFullYear() < year || (d.getFullYear() === year && d.getMonth() <= month)) return [tx.date];
-    return [];
-  }
-
-  const dates = [];
-  let current = new Date(tx.date + "T12:00:00");
-  const endDateStr = tx.recurring_end_date || tx.recurringEndDate;
-  const endType = tx.recurring_end_type || tx.recurringEndType;
-  const occrs = tx.recurring_occurrences || tx.recurringOccurrences;
-  const freq = tx.recurring_frequency || tx.recurringFrequency;
-
-  const end = endDateStr && endType === 'date' ? new Date(endDateStr + "T23:59:59") : null;
-  const maxOccurrences = endType === 'occurrences' ? parseInt(occrs) : null;
-  
-  let occurrencesCount = 0;
-
-  while (true) {
-    if (end && current > end) break;
-    if (maxOccurrences && occurrencesCount >= maxOccurrences) break;
-
-    const currentYear = current.getFullYear();
-    const currentMonth = current.getMonth();
-    
-    if (currentYear > year || (currentYear === year && currentMonth > month)) {
-      break;
-    }
-
-    dates.push(current.toISOString().split("T")[0]);
-
-    occurrencesCount++;
-    const next = new Date(current);
-    if (freq === "daily") next.setDate(next.getDate() + 1);
-    else if (freq === "weekly") next.setDate(next.getDate() + 7);
-    else if (freq === "biweekly") next.setDate(next.getDate() + 15);
-    else if (freq === "monthly") next.setMonth(next.getMonth() + 1);
-    else if (freq === "yearly") next.setFullYear(next.getFullYear() + 1);
-    else break; // Fallback
-
-    current = next;
-  }
-
-  return dates;
 }

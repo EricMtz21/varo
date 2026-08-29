@@ -15,6 +15,7 @@ export default function TransactionItem({
   tx,
   onDelete,
   onEdit,
+  card = null,
   delay = 0,
   formatAmount,
   isSelected = false,
@@ -111,12 +112,26 @@ export default function TransactionItem({
               </span>
             )}
           </div>
-          <span
-            className="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full mt-1"
-            style={{ backgroundColor: catColor + "18", color: catColor }}
-          >
-            {tx.category}
-          </span>
+          <div className="flex items-center gap-1 mt-1 min-w-0">
+            <span
+              className="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
+              style={{ backgroundColor: catColor + "18", color: catColor }}
+            >
+              {tx.category}
+            </span>
+            {card && (
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-0"
+                style={{ backgroundColor: card.color + "18", color: card.color }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: card.color }}
+                />
+                <span className="truncate">{card.name}</span>
+              </span>
+            )}
+          </div>
         </div>
 
         <p className="font-bold text-sm shrink-0" style={{ color: accentColor }}>
